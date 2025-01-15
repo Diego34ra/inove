@@ -35,8 +35,8 @@ springdoc:
 cloud:
   aws:
     credentials:
-      access-key: 
-      secret-key:
+      access-key:
+      secret-key: 
     region:
       static: us-east-1
     s3:

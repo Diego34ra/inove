@@ -38,9 +38,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private MyModelMapper mapper;
 
     @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @Autowired
     private InoveUtils inoveUtils;
 
     @Override
@@ -72,7 +69,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if(cpfExists(newUser.getCpf()))
             throw new ResourceBadRequestException("Esse CPF á está cadastrado!");
 
-        String encryptedPasswrod = bCryptPasswordEncoder.encode(newUser.getPassword());
+        String encryptedPasswrod = new BCryptPasswordEncoder().encode(newUser.getPassword());
         newUser.setPassword(encryptedPasswrod);
 
         return mapper.mapTo(userRepository.save(newUser), UserResponseDTO.class);
@@ -94,7 +91,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
        if(cpfExists(userCreate.getCpf()))
            throw new ResourceBadRequestException("Esse CPF á está cadastrado!");
 
-       String encryptedPasswrod = bCryptPasswordEncoder.encode(userCreate.getPassword());
+        String encryptedPasswrod = new BCryptPasswordEncoder().encode(userCreate.getPassword());
        userCreate.setPassword(encryptedPasswrod);
 
        userCreate.setSchool(userCreate.getSchool());

@@ -138,7 +138,6 @@ public class UserServiceImplTest {
 
 
         when(mapper.mapTo(requestDto, User.class)).thenReturn(user);
-        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(mapper.mapTo(savedUser, UserResponseDTO.class)).thenReturn(expectedDto);
 
@@ -153,7 +152,6 @@ public class UserServiceImplTest {
 
 
 
-        verify(passwordEncoder).encode("password123");
         verify(userRepository).save(any(User.class));
         verify(mapper).mapTo(requestDto, User.class);
         verify(mapper).mapTo(savedUser, UserResponseDTO.class);
@@ -194,7 +192,6 @@ public class UserServiceImplTest {
 
         when(schoolService.findById(schoolId)).thenReturn(school);
         when(mapper.mapTo(requestDto, User.class)).thenReturn(student);
-        when(passwordEncoder.encode(requestDto.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(student);
         when(mapper.mapTo(student, StudentResponseDTO.class)).thenReturn(expectedDto);
 
@@ -205,7 +202,6 @@ public class UserServiceImplTest {
         assertEquals("student@email.com", result.getEmail());
 
         verify(schoolService).findById(schoolId);
-        verify(passwordEncoder).encode("password123");
         verify(userRepository).save(any(User.class));
     }
 
