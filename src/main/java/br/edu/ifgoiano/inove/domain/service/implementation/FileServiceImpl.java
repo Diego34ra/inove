@@ -52,7 +52,7 @@ public class FileServiceImpl implements FileService{
 
         contentService.create(courseId, sectionId, newContent);
 
-        return "File uploaded successfully to S3.";
+        return "Sucesso no upload do arquivo!";
     }
 
     @Override
@@ -64,4 +64,16 @@ public class FileServiceImpl implements FileService{
 
         return s3Service.getFileStream(getObjectRequest);
     }
+
+    @Override
+    public void delete(Long courseId, Long sectionId, Long contentId) {
+        Content content = contentService.findById(sectionId, contentId);
+
+        s3Service.deleteFile(bucketName, content.getFileName());
+
+        contentService.deleteById(courseId, sectionId);
+
+        System.out.println("Todas as referências do arquivo foram deletadas!");
+    }
+
 }
