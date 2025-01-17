@@ -18,4 +18,6 @@ public class UserSimpleResponseDTO {
     private String name;
 
     private UserRole role;
+
+    private String email;
 }

@@ -80,6 +80,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public StudentResponseDTO create(Long schoolId, StudentRequestDTO newUserDTO) {
 
        var userCreate = mapper.mapTo(newUserDTO, User.class);
+       userCreate.setSchool(schoolService.findById(schoolId));
 
        if (userCreate.getRole() == null)
            userCreate.setRole(UserRole.STUDENT);
@@ -90,7 +91,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
        if(cpfExists(userCreate.getCpf()))
            throw new ResourceBadRequestException("Esse CPF á está cadastrado!");
 
-       String encryptedPasswrod = new BCryptPasswordEncoder().encode(userCreate.getPassword());
+        String encryptedPasswrod = new BCryptPasswordEncoder().encode(userCreate.getPassword());
        userCreate.setPassword(encryptedPasswrod);
 
        userCreate.setSchool(userCreate.getSchool());
