@@ -31,4 +31,8 @@ public class S3ServiceImpl {
         ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getObjectRequest);
         return s3Object;
     }
+
+    public void deleteFile(String bucketName, String keyName) {
+        s3Client.deleteObject(builder -> builder.bucket(bucketName).key(keyName).build());
+    }
 }

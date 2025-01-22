@@ -4,6 +4,7 @@ import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
 import br.edu.ifgoiano.inove.controller.dto.request.content.ContentRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.content.ContentOutputDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.content.ContentSimpleOutputDTO;
+import br.edu.ifgoiano.inove.controller.exceptions.ResourceNotFoundException;
 import br.edu.ifgoiano.inove.domain.model.Content;
 import br.edu.ifgoiano.inove.domain.model.Course;
 import br.edu.ifgoiano.inove.domain.model.Section;
@@ -83,6 +84,55 @@ class ContentServiceImplTest {
 
     @Test
     void findOneById() {
+        // 1. Setup test data
+        Long sectionId = 1L;
+        Long contentId = 1L;
+
+        Content existingContent = new Content();
+        existingContent.setId(contentId);
+        existingContent.setTitle("Test Content");
+
+        ContentOutputDTO expectedOutput = new ContentOutputDTO();
+        expectedOutput.setId(contentId);
+        expectedOutput.setTitle("Test Content");
+
+        // 2. Configure mock behavior
+        when(contentRepository.findByIdAndSectionId(contentId, sectionId))
+                .thenReturn(Optional.of(existingContent));
+        when(mapper.mapTo(existingContent, ContentOutputDTO.class))
+                .thenReturn(expectedOutput);
+
+        // 3. Execute the method
+        ContentOutputDTO result = contentService.findOneById(sectionId, contentId);
+
+        // 4. Assertions
+        assertNotNull(result, "The result should not be null");
+        assertEquals(contentId, result.getId(), "Content ID should match");
+        assertEquals("Test Content", result.getTitle(), "Content title should match");
+
+        // 5. Verify mock interactions
+        verify(contentRepository).findByIdAndSectionId(contentId, sectionId);
+        verify(mapper).mapTo(existingContent, ContentOutputDTO.class);
+    }
+
+    // You might also want to test the error case
+    @Test
+    void findOneById_WhenContentNotFound_ShouldThrowException() {
+        // 1. Setup test data
+        Long sectionId = 1L;
+        Long contentId = 1L;
+
+        // 2. Configure mock to return empty
+        when(contentRepository.findByIdAndSectionId(contentId, sectionId))
+                .thenReturn(Optional.empty());
+
+        // 3. Execute and assert throws exception
+        assertThrows(ResourceNotFoundException.class, () -> {
+            contentService.findOneById(sectionId, contentId);
+        }, "Should throw exception when content not found");
+
+        // 4. Verify mock interaction
+        verify(contentRepository).findByIdAndSectionId(contentId, sectionId);
     }
 
     @Test

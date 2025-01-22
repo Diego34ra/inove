@@ -6,7 +6,7 @@ import br.edu.ifgoiano.inove.controller.dto.response.course.CourseResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.course.CourseSimpleResponseDTO;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceNotFoundException;
 import br.edu.ifgoiano.inove.domain.model.Course;
-import br.edu.ifgoiano.inove.domain.repository.CoursoRepository;
+import br.edu.ifgoiano.inove.domain.repository.CourseRepository;
 import br.edu.ifgoiano.inove.domain.service.CourseService;
 import br.edu.ifgoiano.inove.domain.utils.InoveUtils;
 import org.springframework.beans.BeanUtils;
@@ -20,7 +20,7 @@ import java.util.List;
 public class CourseServiceImpl implements CourseService {
 
     @Autowired
-    private CoursoRepository cursoRepository;
+    private CourseRepository cursoRepository;
 
     @Autowired
     private MyModelMapper mapper;

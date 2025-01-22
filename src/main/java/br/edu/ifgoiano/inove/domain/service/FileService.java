@@ -11,4 +11,6 @@ public interface FileService {
                   ContentSimpleRequestDTO contentDTO) throws IOException;
 
     InputStream stream(String fileName);
+
+    void delete(Long courseId, Long sectionId, Long contentId);
 }

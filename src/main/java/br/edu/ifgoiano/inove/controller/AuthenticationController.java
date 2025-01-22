@@ -1,11 +1,13 @@
 package br.edu.ifgoiano.inove.controller;
 
 import br.edu.ifgoiano.inove.controller.dto.request.auth.AuthenticationDTO;
+import br.edu.ifgoiano.inove.controller.dto.request.user.UserRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.login.LoginResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.request.auth.RefreshTokenDTO;
 import br.edu.ifgoiano.inove.controller.dto.request.user.StudentRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.StudentResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserDetailResponseDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.user.UserResponseDTO;
 import br.edu.ifgoiano.inove.controller.exceptions.ErrorDetails;
 import br.edu.ifgoiano.inove.domain.model.User;
 import br.edu.ifgoiano.inove.domain.service.SchoolService;
@@ -74,8 +76,8 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = UserDetailResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Erro ao registrar usuário.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
-    public ResponseEntity<StudentResponseDTO> create(@RequestBody @Valid StudentRequestDTO user){
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(1L, user));
+    public ResponseEntity<UserResponseDTO> create(@RequestBody @Valid UserRequestDTO user){
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(user));
     }
 
 }
