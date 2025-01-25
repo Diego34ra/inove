@@ -1,7 +1,9 @@
 package br.edu.ifgoiano.inove.controller;
 
-import br.edu.ifgoiano.inove.controller.dto.request.sectionDTOs.SectionSimpleOutputDTO;
-import br.edu.ifgoiano.inove.controller.exceptions.EscolaNotFoundException;
+import br.edu.ifgoiano.inove.controller.dto.request.section.SectionRequestDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.section.SectionResponseDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.section.SectionSimpleResponseDTO;
+import br.edu.ifgoiano.inove.controller.exceptions.ErrorDetails;
 import br.edu.ifgoiano.inove.domain.model.Section;
 import br.edu.ifgoiano.inove.domain.service.SectionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,36 +31,31 @@ public class SectionController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Seções listadas com sucesso.",
                     content = { @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = SectionSimpleOutputDTO.class)))}),
+                            array = @ArraySchema(schema = @Schema(implementation = SectionSimpleResponseDTO.class)))}),
             //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
-    public List<SectionSimpleOutputDTO> list(@PathVariable Long courseId){
+    public List<SectionSimpleResponseDTO> list(@PathVariable Long courseId){
         return sectionService.list(courseId);
     }
 
     @GetMapping("/{sectionId}")
     @Operation(summary = "Buscar uma seção")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Seção encontrada com sucesso.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = SectionSimpleOutputDTO.class))}),
+            @ApiResponse(responseCode = "200", description = "Seção encontrada com sucesso.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = SectionSimpleResponseDTO.class))}),
             //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
     public ResponseEntity<?> findOne(@PathVariable Long courseId, @PathVariable Long sectionId){
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    sectionService.findOne(courseId, sectionId));
-        }catch(EscolaNotFoundException ex){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(sectionService.findOne(courseId, sectionId));
     }
 
     @PostMapping
     @Operation(summary = "Cria uma seção")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Secao adicionado com sucesso.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Section.class))}),
-            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+            @ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
-    public Section create(@PathVariable Long courseId, @RequestBody @Validated Section section){
-        return sectionService.create(courseId, section);
+    public SectionResponseDTO create(@PathVariable Long courseId, @RequestBody @Validated SectionRequestDTO sectionDTO){
+        return sectionService.create(courseId, sectionDTO);
     }
 
     @PutMapping("/{sectionId}")
@@ -67,8 +64,8 @@ public class SectionController {
             @ApiResponse(responseCode = "200", description = "Secao atualizado com sucesso.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Section.class))}),
             //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
-    public ResponseEntity<?> update(@PathVariable Long courseId, @PathVariable Long sectionId, @RequestBody Section section){
-        Section updatedSection = sectionService.update(courseId, sectionId, section);
+    public ResponseEntity<?> update(@PathVariable Long courseId, @PathVariable Long sectionId, @RequestBody SectionRequestDTO sectionDTO){
+        SectionResponseDTO updatedSection = sectionService.update(courseId, sectionId, sectionDTO);
 
         return ResponseEntity.status(HttpStatus.OK).body(updatedSection);
     }

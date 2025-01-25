@@ -1,7 +1,8 @@
 package br.edu.ifgoiano.inove.controller;
 
-import br.edu.ifgoiano.inove.controller.dto.request.contentDTOs.ContentSimpleOutputDTO;
-import br.edu.ifgoiano.inove.controller.exceptions.EscolaNotFoundException;
+import br.edu.ifgoiano.inove.controller.dto.request.content.ContentRequestDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.content.ContentOutputDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.content.ContentSimpleOutputDTO;
 import br.edu.ifgoiano.inove.domain.model.Content;
 import br.edu.ifgoiano.inove.domain.service.ContentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,30 +38,26 @@ public class ContentController {
     @GetMapping("/{contentId}")
     @Operation(summary = "Buscar um conteudo")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Coteudo encontrado com sucesso.",content = { @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = Content.class))}),
+            @ApiResponse(responseCode = "200", description = "Coteudo encontrado com sucesso.",content = { @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = ContentOutputDTO.class))}),
             //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
     public ResponseEntity<?> findOne(@PathVariable Long sectionId, @PathVariable Long contentId){
-        try {
-            Content savedContent = contentService.findById(sectionId, contentId);
+        ContentOutputDTO savedContent = contentService.findOneById(sectionId, contentId);
 
-            return ResponseEntity.status(HttpStatus.OK).body(savedContent);
-        }catch(EscolaNotFoundException ex){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(savedContent);
     }
 
-    @PostMapping
-    @Operation(summary = "Adiciona um conteudo")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Coteudo adicionado com sucesso.",content = { @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = Content.class))}),
-            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
-    })
-    public Content create(@PathVariable Long courseId,
-                          @PathVariable Long sectionId,
-                          @RequestBody @Validated Content newContent){
-        return contentService.create(courseId, sectionId, newContent);
-    }
+//    @PostMapping
+//    @Operation(summary = "Adiciona um conteudo")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "201", description = "Coteudo adicionado com sucesso.",content = { @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = Content.class))}),
+//            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+//    })
+//    public ContentOutputDTO create(@PathVariable Long courseId,
+//                          @PathVariable Long sectionId,
+//                          @RequestBody @Validated ContentInputDTO newContent){
+//        return contentService.create(courseId, sectionId, newContent);
+//    }
 
     @PutMapping("/{contentId}")
     @Operation(summary = "Atualiza um conteudo")
@@ -72,8 +68,8 @@ public class ContentController {
     public ResponseEntity<?> update(@PathVariable Long courseId,
                                     @PathVariable Long sectionId,
                                     @PathVariable Long contentId,
-                                    @RequestBody Content newContent){
-        Content updatedContent = contentService.update(courseId, sectionId, contentId, newContent);
+                                    @RequestBody ContentRequestDTO newContent){
+        ContentOutputDTO updatedContent = contentService.update(courseId, sectionId, contentId, newContent);
 
         return ResponseEntity.status(HttpStatus.OK).body(updatedContent);
     }

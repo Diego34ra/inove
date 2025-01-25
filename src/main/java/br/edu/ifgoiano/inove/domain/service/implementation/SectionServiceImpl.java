@@ -1,6 +1,8 @@
 package br.edu.ifgoiano.inove.domain.service.implementation;
 
-import br.edu.ifgoiano.inove.controller.dto.request.sectionDTOs.SectionSimpleOutputDTO;
+import br.edu.ifgoiano.inove.controller.dto.request.section.SectionRequestDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.section.SectionResponseDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.section.SectionSimpleResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceInUseException;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceNotFoundException;
@@ -30,37 +32,47 @@ public class SectionServiceImpl implements SectionService {
     private InoveUtils inoveUtils;
 
     @Override
-    public List<SectionSimpleOutputDTO> list(Long courseId) {
-        return mapper.toList(sectionRespository.findByCourseId(courseId), SectionSimpleOutputDTO.class);
+    public List<SectionSimpleResponseDTO> list(Long courseId) {
+        return mapper.toList(sectionRespository.findByCourseId(courseId), SectionSimpleResponseDTO.class);
     }
 
     @Override
-    public SectionSimpleOutputDTO findOne(Long courseId, Long sectionId) {
-        Section section = sectionRespository.findByIdAndCourseId(sectionId, courseId)
-                .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhuma seção com esse id."));
-        return mapper.mapTo(section, SectionSimpleOutputDTO.class);
+    public Section findById(Long sectionId) {
+        return sectionRespository.findById(sectionId)
+                .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhum conteudo com esse id."));
     }
 
-    protected Section findByIdAndCursoId(Long courseId, Long sectionId) {
+    @Override
+    public SectionResponseDTO findOne(Long courseId, Long sectionId) {
+        Section section = sectionRespository.findByIdAndCourseId(sectionId, courseId)
+                .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhuma seção com esse id."));
+        return mapper.mapTo(section, SectionResponseDTO.class);
+    }
+
+    @Override
+    public Section findByIdAndCursoId(Long courseId, Long sectionId) {
         return sectionRespository.findByIdAndCourseId(sectionId, courseId)
                 .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhuma seção com esse id."));
     }
 
     @Override
     @Transactional
-    public Section create(Long courseId, Section newSection) {
-        newSection.setCourse(courseService.findById(courseId));
+    public SectionResponseDTO create(Long courseId, SectionRequestDTO newSectionDTO) {
+        Section section = mapper.mapTo(newSectionDTO, Section.class);
+        section.setCourse(courseService.findById(courseId));
         courseService.saveUpdateDate(courseId);
-        return sectionRespository.save(newSection);
+        return mapper.mapTo(sectionRespository.save(section), SectionResponseDTO.class);
     }
 
     @Override
     @Transactional
-    public Section update(Long courseId, Long sectionId, Section newSection) {
+    public SectionResponseDTO update(Long courseId, Long sectionId, SectionRequestDTO newSectionDTO) {
+        Section newSection = mapper.mapTo(newSectionDTO, Section.class);
+
         Section section = findByIdAndCursoId(courseId, sectionId);
         courseService.saveUpdateDate(courseId);
         BeanUtils.copyProperties(newSection, section, inoveUtils.getNullPropertyNames(newSection));
-        return sectionRespository.save(section);
+        return mapper.mapTo(sectionRespository.save(section), SectionResponseDTO.class);
     }
 
     @Override

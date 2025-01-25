@@ -1,30 +1,48 @@
 package br.edu.ifgoiano.inove.domain.service;
 
-import br.edu.ifgoiano.inove.controller.dto.request.userDTOs.UserOutputDTO;
-import br.edu.ifgoiano.inove.controller.dto.request.userDTOs.StudentOutputDTO;
-import br.edu.ifgoiano.inove.controller.dto.request.userDTOs.UserSimpleOutputDTO;
+import br.edu.ifgoiano.inove.controller.dto.request.user.*;
+import br.edu.ifgoiano.inove.controller.dto.response.user.StudentResponseDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.user.UserResponseDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.user.UserSimpleResponseDTO;
 import br.edu.ifgoiano.inove.domain.model.User;
+import jakarta.transaction.Transactional;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
 public interface UserService {
-    List<UserSimpleOutputDTO> list();
+    List<UserSimpleResponseDTO> list();
 
     User findById(Long id);
 
-    User create (User newUser);
+    UserResponseDTO findOneById(Long id);
 
-    User create (Long schoolId, User newUser);
+    @Transactional
+    UserResponseDTO create(UserRequestDTO newUser);
 
-    User update (Long id, User user);
+    @Transactional
+    StudentResponseDTO create (Long schoolId, StudentRequestDTO newStudentDTO);
+
+    @Transactional
+    UserResponseDTO update (Long id, User user);
 
     void deleteById(Long Id);
 
-    List<User> listUserByRole(String role);
+    List<UserSimpleResponseDTO> listUserByRole(String role);
 
-    List<UserOutputDTO> listAdmins();
+    List<UserResponseDTO> listAdmins();
 
-    List<StudentOutputDTO> listStudents();
+    List<StudentResponseDTO> listStudents();
 
-    List<UserOutputDTO> listInstructors();
+    List<UserResponseDTO> listInstructors();
+
+    UserDetails findByEmail(String email);
+
+    boolean emailExists(String email);
+
+    boolean cpfExists(String cpf);
+
+//    UserDetails loadByUsername(String username) throws UsernameNotFoundException;
+//
+//    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 }

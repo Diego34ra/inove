@@ -15,11 +15,10 @@ public class School {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-
     private String city;
-
+    private String email;
+    private String password;
     private String federativeUnit;
 
     @OneToMany(mappedBy = "school")
