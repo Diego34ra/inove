@@ -36,12 +36,10 @@ class TokenServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Setup test configuration
         ReflectionTestUtils.setField(tokenService, "secret", SECRET);
         ReflectionTestUtils.setField(tokenService, "hourExpirationToken", TOKEN_EXPIRATION);
         ReflectionTestUtils.setField(tokenService, "hourExpirationRefreshToken", REFRESH_TOKEN_EXPIRATION);
 
-        // Create mock user
         mockUser = new User();
         mockUser.setId(1L);
         mockUser.setEmail("test@example.com");
@@ -51,15 +49,12 @@ class TokenServiceTest {
 
     @Test
     void getAuthentication_ShouldGenerateValidTokens() {
-        // Act
         var result = tokenService.getAuthentication(mockUser);
 
-        // Assert
         assertNotNull(result);
         assertNotNull(result.token());
         assertNotNull(result.refreshToken());
 
-        // Validate both tokens
         String validatedToken = tokenService.validateToken(result.token());
         String validatedRefreshToken = tokenService.validateToken(result.refreshToken());
 
@@ -69,10 +64,8 @@ class TokenServiceTest {
 
     @Test
     void generateToken_ShouldCreateValidToken() {
-        // Act
         String token = tokenService.generateToken(mockUser, TOKEN_EXPIRATION);
 
-        // Assert
         assertNotNull(token);
         String validatedEmail = tokenService.validateToken(token);
         assertEquals(mockUser.getEmail(), validatedEmail);
@@ -80,29 +73,23 @@ class TokenServiceTest {
 
     @Test
     void validateToken_WithInvalidToken_ShouldReturnEmptyString() {
-        // Act
         String result = tokenService.validateToken("invalid.token.string");
 
-        // Assert
         assertEquals("", result);
     }
 
     @Test
     void getRefreshToken_WithValidToken_ShouldReturnNewTokens() {
-        // Arrange
         String refreshToken = tokenService.generateToken(mockUser, REFRESH_TOKEN_EXPIRATION);
         RefreshTokenDTO refreshTokenDTO = new RefreshTokenDTO(refreshToken);
         when(userService.findByEmail(anyString())).thenReturn(mockUser);
 
-        // Act
         var result = tokenService.getRefreshToken(refreshTokenDTO);
 
-        // Assert
         assertNotNull(result);
         assertNotNull(result.token());
         assertNotNull(result.refreshToken());
 
-        // Validate new tokens
         String validatedToken = tokenService.validateToken(result.token());
         String validatedRefreshToken = tokenService.validateToken(result.refreshToken());
 
@@ -112,12 +99,10 @@ class TokenServiceTest {
 
     @Test
     void getRefreshToken_WithInvalidUser_ShouldThrowException() {
-        // Arrange
         String refreshToken = tokenService.generateToken(mockUser, REFRESH_TOKEN_EXPIRATION);
         RefreshTokenDTO refreshTokenDTO = new RefreshTokenDTO(refreshToken);
         when(userService.findByEmail(anyString())).thenReturn(null);
 
-        // Act & Assert
         assertThrows(ResourceBadRequestException.class, () -> {
             tokenService.getRefreshToken(refreshTokenDTO);
         });
@@ -125,10 +110,8 @@ class TokenServiceTest {
 
     @Test
     void getRefreshToken_WithInvalidToken_ShouldThrowException() {
-        // Arrange
         RefreshTokenDTO refreshTokenDTO = new RefreshTokenDTO("invalid.token.string");
 
-        // Act & Assert
         assertThrows(ResourceBadRequestException.class, () -> {
             tokenService.getRefreshToken(refreshTokenDTO);
         });
@@ -136,7 +119,6 @@ class TokenServiceTest {
 
     @Test
     void generateToken_WithNullUser_ShouldThrowException() {
-        // Act & Assert
         assertThrows(RuntimeException.class, () -> {
             tokenService.generateToken(null, TOKEN_EXPIRATION);
         });

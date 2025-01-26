@@ -84,7 +84,6 @@ class ContentServiceImplTest {
 
     @Test
     void findOneById() {
-        // 1. Setup test data
         Long sectionId = 1L;
         Long contentId = 1L;
 
@@ -96,42 +95,33 @@ class ContentServiceImplTest {
         expectedOutput.setId(contentId);
         expectedOutput.setTitle("Test Content");
 
-        // 2. Configure mock behavior
         when(contentRepository.findByIdAndSectionId(contentId, sectionId))
                 .thenReturn(Optional.of(existingContent));
         when(mapper.mapTo(existingContent, ContentOutputDTO.class))
                 .thenReturn(expectedOutput);
 
-        // 3. Execute the method
         ContentOutputDTO result = contentService.findOneById(sectionId, contentId);
 
-        // 4. Assertions
         assertNotNull(result, "The result should not be null");
         assertEquals(contentId, result.getId(), "Content ID should match");
         assertEquals("Test Content", result.getTitle(), "Content title should match");
 
-        // 5. Verify mock interactions
         verify(contentRepository).findByIdAndSectionId(contentId, sectionId);
         verify(mapper).mapTo(existingContent, ContentOutputDTO.class);
     }
 
-    // You might also want to test the error case
     @Test
     void findOneById_WhenContentNotFound_ShouldThrowException() {
-        // 1. Setup test data
         Long sectionId = 1L;
         Long contentId = 1L;
 
-        // 2. Configure mock to return empty
         when(contentRepository.findByIdAndSectionId(contentId, sectionId))
                 .thenReturn(Optional.empty());
 
-        // 3. Execute and assert throws exception
         assertThrows(ResourceNotFoundException.class, () -> {
             contentService.findOneById(sectionId, contentId);
         }, "Should throw exception when content not found");
 
-        // 4. Verify mock interaction
         verify(contentRepository).findByIdAndSectionId(contentId, sectionId);
     }
 

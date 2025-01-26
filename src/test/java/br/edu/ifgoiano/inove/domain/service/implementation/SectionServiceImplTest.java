@@ -207,10 +207,8 @@ public class SectionServiceImplTest {
         when(sectionRepository.save(any(Section.class))).thenReturn(updatedSection);
         when(mapper.mapTo(updatedSection, SectionResponseDTO.class)).thenReturn(expectedDto);
 
-        // Act
         SectionResponseDTO result = sectionService.update(courseId, sectionId, requestDto);
 
-        // Assert
         assertNotNull(result);
         assertEquals("Updated Section", result.getTitle());
         assertEquals("Updated Description", result.getDescription());
@@ -221,7 +219,6 @@ public class SectionServiceImplTest {
 
     @Test
     void update_WithPartialData_ShouldUpdateOnlyProvidedFields() {
-        // Arrange
         Long courseId = 1L;
         Long sectionId = 1L;
 
