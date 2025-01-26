@@ -42,9 +42,25 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/discente").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/inove/escolas/").permitAll()
-                                .requestMatchers(HttpMethod.POST, "api/inove/videos").permitAll()
-                                .requestMatchers(HttpMethod.GET, "api/inove/videos/**").permitAll()
-//                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/videos/**").permitAll()
+
+                                // Cursos
+                                .requestMatchers(HttpMethod.GET, "/api/inove/cursos/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/**").hasRole("INSTRUCTOR")
+                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/**").hasRole("ADMINISTRATOR")
+                                .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/**").hasRole("ADMINISTRATOR")
+
+                                // Seções
+                                .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
+                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                                .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                                .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+
+                                // Conteúdo
+                                .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
+                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
+                                .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
+                                .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
+
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(httpSecurityExceptionHandlingConfigurer ->
