@@ -123,9 +123,9 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
     public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody User user){
-        UserResponseDTO updatedEscola = userService.update(userId, user);
+        UserResponseDTO updatedUser = userService.update(userId, user);
 
-        return ResponseEntity.status(HttpStatus.OK).body(updatedEscola);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -138,5 +138,18 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable String userId){
             userService.deleteById(Long.parseLong(userId));
             return ResponseEntity.noContent().build();
+    }
+
+
+    @PostMapping("/{userId}/inscreverse/{courseId}")
+    @Operation(summary =  "Realiza incrição em curso")
+    @ApiResponses({
+            @ApiResponse(responseCode = "404", description = "Recurso não encontrado."),
+            @ApiResponse(responseCode = "200", description = "Usuario atualizado com sucesso.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))}),
+            @ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+    })
+    public ResponseEntity<?> connectUsertoCourse(@PathVariable Long userId, @PathVariable Long courseId){
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(userService.subscribeStudent(userId, courseId));
     }
 }

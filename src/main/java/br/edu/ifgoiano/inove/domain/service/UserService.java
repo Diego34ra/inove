@@ -42,6 +42,8 @@ public interface UserService {
 
     boolean cpfExists(String cpf);
 
+    UserResponseDTO subscribeStudent(Long userId, Long courseId);
+
 //    UserDetails loadByUsername(String username) throws UsernameNotFoundException;
 //
 //    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;

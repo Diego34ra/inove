@@ -8,9 +8,11 @@ import br.edu.ifgoiano.inove.controller.dto.response.user.UserSimpleResponseDTO;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceBadRequestException;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceInUseException;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceNotFoundException;
+import br.edu.ifgoiano.inove.domain.model.Course;
 import br.edu.ifgoiano.inove.domain.model.User;
 import br.edu.ifgoiano.inove.domain.model.UserRole;
 import br.edu.ifgoiano.inove.domain.repository.UserRepository;
+import br.edu.ifgoiano.inove.domain.service.CourseService;
 import br.edu.ifgoiano.inove.domain.service.SchoolService;
 import br.edu.ifgoiano.inove.domain.service.UserService;
 import br.edu.ifgoiano.inove.domain.utils.InoveUtils;
@@ -39,6 +41,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private InoveUtils inoveUtils;
+
+    @Autowired
+    private CourseService courseService;
 
     @Override
     public List<UserSimpleResponseDTO> list() {
@@ -149,6 +154,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public boolean cpfExists(String cpf) {
         return userRepository.existsByCpf(cpf);
+    }
+
+    @Override
+    public UserResponseDTO subscribeStudent(Long userId, Long courseId) {
+
+        User user =  findById(userId);
+        Course course = courseService.findById(courseId);
+
+        user.getStudent_courses().add(course);
+
+        return mapper.mapTo(userRepository.save(user), UserResponseDTO.class);
     }
 
     @Override
