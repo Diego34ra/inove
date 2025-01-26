@@ -2,6 +2,7 @@ package br.edu.ifgoiano.inove.controller;
 
 import br.edu.ifgoiano.inove.controller.dto.request.user.*;
 import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
+import br.edu.ifgoiano.inove.controller.dto.response.course.CourseSimpleResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.StudentResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserSimpleResponseDTO;
@@ -151,5 +152,17 @@ public class UserController {
     public ResponseEntity<?> connectUsertoCourse(@PathVariable Long userId, @PathVariable Long courseId){
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userService.subscribeStudent(userId, courseId));
+    }
+
+    @GetMapping("/{userId}/cursos")
+    @Operation(summary =  "Lista os cursos de um discente da plataforma")
+    @ApiResponses({
+            @ApiResponse(responseCode = "404", description = "Recurso não encontrado."),
+            @ApiResponse(responseCode = "200", description = "Cursos do usuário listado com sucesso.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CourseSimpleResponseDTO.class))}),
+            @ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+    })
+    public ResponseEntity<?> listStudentCourses(@PathVariable Long userId){
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(userService.getStudentCourses(userId));
     }
 }
