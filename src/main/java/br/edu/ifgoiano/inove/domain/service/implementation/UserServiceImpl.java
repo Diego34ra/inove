@@ -2,6 +2,7 @@ package br.edu.ifgoiano.inove.domain.service.implementation;
 
 import br.edu.ifgoiano.inove.controller.dto.request.user.*;
 import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
+import br.edu.ifgoiano.inove.controller.dto.response.course.CourseSimpleResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.StudentResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserSimpleResponseDTO;
@@ -165,6 +166,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.getStudent_courses().add(course);
 
         return mapper.mapTo(userRepository.save(user), UserResponseDTO.class);
+    }
+
+    @Override
+    public List<CourseSimpleResponseDTO> getStudentCourses(Long userId) {
+        return mapper.toList(userRepository.findById(userId).get().getStudent_courses(), CourseSimpleResponseDTO.class);
     }
 
     @Override
