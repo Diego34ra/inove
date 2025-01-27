@@ -35,8 +35,8 @@ public class FileServiceImpl implements FileService{
     private ContentService contentService;
 
     @Override
-    public String upload(Long courseId, Long sectionId, ContentSimpleRequestDTO contentDTO) throws IOException {
-        MultipartFile file = contentDTO.getFile();
+    public String upload(MultipartFile file, Long courseId, Long sectionId, ContentSimpleRequestDTO contentDTO) throws IOException {
+//        MultipartFile file = contentDTO.getFile();
 
         Path tempFile = Files.createTempFile("temp-", file.getOriginalFilename());
         Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
