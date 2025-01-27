@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -20,11 +21,12 @@ public class FileController {
     private FileService fileService;
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@PathVariable Long courseId,
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
+                                             @PathVariable Long courseId,
                                              @PathVariable Long sectionId,
                                              ContentSimpleRequestDTO contentDTO) {
         try {
-            return ResponseEntity.ok(fileService.upload(courseId, sectionId, contentDTO));
+            return ResponseEntity.ok(fileService.upload(file, courseId, sectionId, contentDTO));
 
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save the file temporarily.");
