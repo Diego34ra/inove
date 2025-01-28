@@ -35,9 +35,9 @@ springdoc:
 cloud:
   aws:
     credentials:
-      access-key:
-      secret-key:
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
     region:
-      static: us-east-1
+      static: ${AWS_REGION}
     s3:
-      bucket: inove-bucket-streaming
+      bucket: ${AWS_S3_BUCKET}

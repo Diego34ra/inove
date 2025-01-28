@@ -31,3 +31,15 @@ build/
 
 ### VS Code ###
 .vscode/
+# Ignorar o arquivo application.yml
+src/main/resources/application.yml
+
+# Outros arquivos sensíveis que podem ser ignorados
+*.env
+*.log
+*.key
+*.pem
+
+# Ignorar credenciais AWS
+.aws/
+**/aws-credentials.json

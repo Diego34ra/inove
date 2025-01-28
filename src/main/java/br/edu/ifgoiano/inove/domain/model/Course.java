@@ -6,7 +6,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -48,4 +50,7 @@ public class Course {
 
     @OneToMany(mappedBy = "course")
     private List<Section> sections;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserCompletedContent> userCompletedContents = new HashSet<>();
 }

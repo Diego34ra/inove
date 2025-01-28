@@ -172,10 +172,8 @@ public class CourseServiceImplTest {
         when(courseRepository.save(any(Course.class))).thenReturn(updatedCourse);
         when(mapper.mapTo(updatedCourse, CourseResponseDTO.class)).thenReturn(expectedDto);
 
-        // Act
         CourseResponseDTO result = courseService.update(courseId, requestDto);
 
-        // Assert
         assertNotNull(result);
         assertEquals("Updated Course", result.getName());
         assertEquals("Updated Description", result.getDescription());
@@ -186,15 +184,12 @@ public class CourseServiceImplTest {
 
     @Test
     void delete_ShouldDeleteCourse_WhenExists() {
-        // Arrange
         Long courseId = 1L;
         Course course = new Course();
         course.setId(courseId);
 
-        // Act
         courseService.delete(courseId);
 
-        // Assert
         verify(courseRepository).deleteById(courseId);
     }
 

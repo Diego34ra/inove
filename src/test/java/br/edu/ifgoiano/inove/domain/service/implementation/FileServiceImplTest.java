@@ -55,7 +55,6 @@ class FileServiceImplTest {
 
 //    @Test
 //    void upload_ShouldSuccessfullyUploadFile() throws IOException {
-//        // Arrange
 //        Long courseId = 1L;
 //        Long sectionId = 1L;
 //        String fileName = "test-video.mp4";
@@ -82,10 +81,8 @@ class FileServiceImplTest {
 //        doNothing().when(s3Service).uploadFile(eq(BUCKET_NAME), eq(fileName), any(File.class));
 //        when(contentService.create(eq(courseId), eq(sectionId), eq(newContent))).thenReturn(contentOutputDTO);
 //
-//        // Act
 //        String result = fileService.upload(courseId, sectionId, contentDTO);
 //
-//        // Assert
 //        assertNotNull(result);
 //        assertEquals("Sucesso no upload do arquivo!", result);
 //        verify(s3Service).uploadFile(eq(BUCKET_NAME), eq(fileName), any(File.class));
@@ -95,23 +92,19 @@ class FileServiceImplTest {
 
     @Test
     void stream_ShouldReturnInputStream() {
-        // Arrange
         String fileName = "test-video.mp4";
         InputStream expectedStream = new ByteArrayInputStream("test content".getBytes());
 
         when(s3Service.getFileStream(any(GetObjectRequest.class))).thenReturn(expectedStream);
 
-        // Act
         InputStream result = fileService.stream(fileName);
 
-        // Assert
         assertNotNull(result);
         verify(s3Service).getFileStream(any(GetObjectRequest.class));
     }
 
 //    @Test
 //    void delete_ShouldDeleteFileAndContent() {
-//        // Arrange
 //        Long courseId = 1L;
 //        Long sectionId = 1L;
 //        Long contentId = 1L;
@@ -126,10 +119,8 @@ class FileServiceImplTest {
 //        doNothing().when(s3Service).deleteFile(BUCKET_NAME, fileName);
 //        doNothing().when(contentService).deleteById(courseId, sectionId);
 //
-//        // Act
 //        fileService.delete(courseId, sectionId, contentId);
 //
-//        // Assert
 //        verify(contentService).findById(sectionId, contentId);
 //        verify(s3Service).deleteFile(BUCKET_NAME, fileName);
 //        verify(contentService).deleteById(courseId, sectionId);
@@ -137,7 +128,6 @@ class FileServiceImplTest {
 
     @Test
     void upload_ShouldHandleIOException() {
-        // Arrange
         Long courseId = 1L;
         Long sectionId = 1L;
         MockMultipartFile file = new MockMultipartFile(
@@ -153,31 +143,26 @@ class FileServiceImplTest {
         doThrow(new RuntimeException("S3 Error")).when(s3Service)
                 .uploadFile(eq(BUCKET_NAME), any(), any(File.class));
 
-        // Act & Assert
         assertThrows(RuntimeException.class, () ->
                 fileService.upload(courseId, sectionId, contentDTO));
     }
 
     @Test
     void stream_ShouldHandleS3ServiceException() {
-        // Arrange
         String fileName = "nonexistent.mp4";
         when(s3Service.getFileStream(any(GetObjectRequest.class)))
                 .thenThrow(new RuntimeException("File not found"));
 
-        // Act & Assert
         assertThrows(RuntimeException.class, () ->
                 fileService.stream(fileName));
     }
 
     @Test
     void delete_ShouldHandleContentNotFound() {
-        // Arrange
         Long courseId = 1L;
         Long sectionId = 1L;
         Long contentId = 1L;
 
-        // Act & Assert
         assertThrows(RuntimeException.class, () ->
                 fileService.delete(courseId, sectionId, contentId));
 
