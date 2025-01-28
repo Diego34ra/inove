@@ -45,8 +45,9 @@ public class SecurityConfiguration {
 
                                 // Cursos
                                 .requestMatchers(HttpMethod.GET, "/api/inove/cursos/**").permitAll()
-                                .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/**").hasRole("INSTRUCTOR")
-                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/**").hasRole("ADMINISTRATOR")
+                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/inscreverse").hasRole("STUDENT") // precisar arrumar conforme o endpoint
+                                .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/**").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/**").hasRole("ADMINISTRATOR")
 
                                 // Seções
