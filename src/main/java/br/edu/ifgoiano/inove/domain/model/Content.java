@@ -2,6 +2,7 @@ package br.edu.ifgoiano.inove.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,6 +34,7 @@ public class Content {
     @JoinColumn(name = "section_id")
     private Section section;
 
+    @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserCompletedContent> userCompletedContents = new HashSet<>();
 }

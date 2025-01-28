@@ -1,6 +1,7 @@
 package br.edu.ifgoiano.inove.domain.model;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +30,7 @@ public class Section {
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER, mappedBy = "section")
     private List<Content> contents;
 
+    @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserCompletedContent> userCompletedContents = new HashSet<>();
 }
