@@ -1,6 +1,7 @@
 package br.edu.ifgoiano.inove.domain.model;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -51,6 +52,7 @@ public class Course {
     @OneToMany(mappedBy = "course")
     private List<Section> sections;
 
+    @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserCompletedContent> userCompletedContents = new HashSet<>();
 }
