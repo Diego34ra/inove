@@ -41,14 +41,18 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.POST, "/api/inove/auth/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/discente").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/inove/usuarios/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/inove/escolas/").permitAll()
 
                                 // Cursos
                                 .requestMatchers(HttpMethod.GET, "/api/inove/cursos/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/inscreverse").hasRole("STUDENT") // precisar arrumar conforme o endpoint
+                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/inscreverse").hasRole("STUDENT")
+                                .requestMatchers(HttpMethod.DELETE, "/api/inove/usuarios/{userId}/cursos/{courseId}").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/**").hasRole("ADMINISTRATOR")
                                 .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/**").hasRole("ADMINISTRATOR")
+                                .requestMatchers(HttpMethod.GET, "/api/inove/usuarios/{userId}/cursos").permitAll()
+
 
                                 // Seções
                                 .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")

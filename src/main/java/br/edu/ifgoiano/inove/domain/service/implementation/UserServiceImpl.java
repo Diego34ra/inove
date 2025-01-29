@@ -158,20 +158,31 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public UserResponseDTO subscribeStudent(Long userId, Long courseId) {
-
-        User user =  findById(userId);
+        User user = findById(userId);
         Course course = courseService.findById(courseId);
+
+        boolean alreadyEnrolled = user.getStudent_courses().stream()
+                .anyMatch(c -> c.getId().equals(courseId));
+        if (alreadyEnrolled) {
+            throw new ResourceBadRequestException("Usuário já está inscrito neste curso.");
+        }
 
         user.getStudent_courses().add(course);
 
         return mapper.mapTo(userRepository.save(user), UserResponseDTO.class);
     }
 
+
     @Override
     public List<CourseSimpleResponseDTO> getStudentCourses(Long userId) {
-        return mapper.toList(userRepository.findById(userId).get().getStudent_courses(), CourseSimpleResponseDTO.class);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado para listar cursos."));
+
+        return mapper.toList(user.getStudent_courses(), CourseSimpleResponseDTO.class);
     }
+
 
     @Override
     public UserDetails findByEmail(String email) {
@@ -182,4 +193,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByEmail(username);
     }
+
+    @Override
+    @Transactional
+    public void removeCourseFromUser(Long userId, Long courseId) {
+        User user = findById(userId);
+        boolean removed = user.getStudent_courses().removeIf(course -> course.getId().equals(courseId)); // Remove o curso
+
+        if (!removed) {
+            throw new ResourceNotFoundException("Curso não encontrado na lista do usuário.");
+        }
+
+        userRepository.save(user);
+    }
+
 }
