@@ -20,6 +20,7 @@ import br.edu.ifgoiano.inove.domain.utils.InoveUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -45,6 +46,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+    private EmailServiceImpl emailServiceImpl;
+
+    @Value("${admin.email}")
+    private String adminEmail;
 
     @Override
     public List<UserSimpleResponseDTO> list() {
@@ -207,4 +214,42 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         userRepository.save(user);
     }
 
+    @Override
+    public void processInstructorRequest(InstructorRequestDTO instructorDTO) {
+        if (userRepository.existsByEmail(instructorDTO.getEmail())) {
+            throw new ResourceBadRequestException("E-mail já cadastrado.");
+        }
+
+        // Envia e-mail para o admin
+        String emailBody = String.format(
+                "Nome: %s\nCPF: %s\nE-mail: %s\nMotivação: %s\n\n" +
+                        "Clique no link para confirmar o cadastro: http://localhost:8080/api/inove/usuarios/instructor/confirmar?email=%s",
+                instructorDTO.getName(), instructorDTO.getCpf(), instructorDTO.getEmail(), instructorDTO.getMotivation(),
+                instructorDTO.getEmail()
+        );
+
+        emailServiceImpl.sendConfirmationEmail(adminEmail, "Novo Cadastro de Instrutor", emailBody);
+    }
+
+    @Override
+    @Transactional
+    public void confirmInstructorRegistration(String email) {
+
+        InstructorRequestDTO instructorDTO = new InstructorRequestDTO();
+
+        User newInstructor = new User();
+        newInstructor.setName(instructorDTO.getName());
+        newInstructor.setCpf(instructorDTO.getCpf());
+        newInstructor.setEmail(instructorDTO.getEmail());
+        newInstructor.setPassword(new BCryptPasswordEncoder().encode("123456"));
+        newInstructor.setRole(UserRole.INSTRUCTOR);
+
+        userRepository.save(newInstructor);
+
+        emailServiceImpl.sendConfirmationEmail(
+                newInstructor.getEmail(),
+                "Cadastro Confirmado",
+                "Seu cadastro como instrutor foi confirmado com sucesso!"
+        );
+    }
 }

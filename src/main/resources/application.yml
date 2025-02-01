@@ -8,7 +8,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/inove?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
     username: root
-    password: 123456
+    password:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     properties:
@@ -35,9 +35,22 @@ springdoc:
 cloud:
   aws:
     credentials:
-      access-key:
+      access-key: 
       secret-key:
     region:
       static: us-east-1
     s3:
       bucket: inove-bucket-streaming
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: inoveprojetointegrador@gmail.com
+    password: jwhg nbfe iiob lwvz
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+admin:
+  email: inoveprojetointegrador@gmail.com

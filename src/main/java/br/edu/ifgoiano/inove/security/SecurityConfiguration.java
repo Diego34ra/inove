@@ -42,7 +42,10 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/discente").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/**").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/api/inove/usuarios/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/instructor/create").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/inove/usuarios/instructor/confirmar").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/inove/escolas/").permitAll()
+
 
                                 // Cursos
                                 .requestMatchers(HttpMethod.GET, "/api/inove/cursos/**").permitAll()

@@ -179,5 +179,15 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/instructor/create")
+    public ResponseEntity<String> createInstructor(@RequestBody InstructorRequestDTO instructorDTO) {
+        userService.processInstructorRequest(instructorDTO);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Cadastro enviado para aprovação.");
+    }
 
+    @GetMapping("/instructor/confirmar")
+    public ResponseEntity<String> confirmInstructor(@RequestParam String email) {
+        userService.confirmInstructorRegistration(email);
+        return ResponseEntity.status(HttpStatus.OK).body("Cadastro confirmado com sucesso.");
+    }
 }

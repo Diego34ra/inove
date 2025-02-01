@@ -49,8 +49,7 @@ public interface UserService {
 
     void removeCourseFromUser(Long userId, Long courseId);
 
+    void processInstructorRequest(InstructorRequestDTO instructorDTO);
 
-//    UserDetails loadByUsername(String username) throws UsernameNotFoundException;
-//
-//    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+    void confirmInstructorRegistration(String email);
 }
