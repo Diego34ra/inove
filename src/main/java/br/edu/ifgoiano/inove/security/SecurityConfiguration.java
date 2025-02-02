@@ -44,9 +44,8 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/discente").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/**").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/api/inove/usuarios/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/inove/usuarios/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/instructor/create").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/inove/usuarios/instructor/confirmar").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/inove/usuarios/instrutor/confirmar").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/inove/escolas/").permitAll()
 
                                 // Escolas
                                 .requestMatchers(HttpMethod.POST, "/api/inove/escolas/**").permitAll()
@@ -58,12 +57,10 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/inscreverse").hasRole("STUDENT")
                                 .requestMatchers(HttpMethod.DELETE, "/api/inove/usuarios/{userId}/cursos/{courseId}").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/**").hasRole("ADMINISTRATOR")
                                 .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/**").hasRole("ADMINISTRATOR")
                                 .requestMatchers(HttpMethod.GET, "/api/inove/usuarios/{userId}/cursos").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/inove/cursos/instrutor/**").hasRole("INSTRUCTOR")
-                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/upload-imagem-curso").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/inove/cursos/preview-imagem/**").permitAll()
+
 
                                 // Seções
                                 .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")

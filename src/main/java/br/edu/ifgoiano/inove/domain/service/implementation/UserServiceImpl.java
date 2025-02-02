@@ -18,6 +18,7 @@ import br.edu.ifgoiano.inove.domain.service.SchoolService;
 import br.edu.ifgoiano.inove.domain.service.UserService;
 import br.edu.ifgoiano.inove.domain.utils.InoveUtils;
 import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +29,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -52,6 +55,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Value("${admin.email}")
     private String adminEmail;
+
+    private final Map<String, InstructorRequestDTO> pendingInstructors = new HashMap<>();
 
     @Override
     public List<UserSimpleResponseDTO> list() {
@@ -220,10 +225,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new ResourceBadRequestException("E-mail já cadastrado.");
         }
 
-        // Envia e-mail para o admin
+        pendingInstructors.put(instructorDTO.getEmail(), instructorDTO);
+
         String emailBody = String.format(
                 "Nome: %s\nCPF: %s\nE-mail: %s\nMotivação: %s\n\n" +
-                        "Clique no link para confirmar o cadastro: http://localhost:8080/api/inove/usuarios/instructor/confirmar?email=%s",
+                        "Clique no link para confirmar o cadastro: http://localhost:8080/api/inove/usuarios/instrutor/confirmar?email=%s",
                 instructorDTO.getName(), instructorDTO.getCpf(), instructorDTO.getEmail(), instructorDTO.getMotivation(),
                 instructorDTO.getEmail()
         );
@@ -234,22 +240,46 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public void confirmInstructorRegistration(String email) {
+        InstructorRequestDTO instructorDTO = pendingInstructors.get(email);
+        if (instructorDTO == null) {
+            throw new ResourceNotFoundException("Solicitação de cadastro não encontrada.");
+        }
 
-        InstructorRequestDTO instructorDTO = new InstructorRequestDTO();
+        String temporaryPassword = RandomStringUtils.randomAlphanumeric(8);
+        String encryptedPassword = new BCryptPasswordEncoder().encode(temporaryPassword);
 
         User newInstructor = new User();
         newInstructor.setName(instructorDTO.getName());
         newInstructor.setCpf(instructorDTO.getCpf());
         newInstructor.setEmail(instructorDTO.getEmail());
-        newInstructor.setPassword(new BCryptPasswordEncoder().encode("123456"));
+        newInstructor.setPassword(encryptedPassword);
         newInstructor.setRole(UserRole.INSTRUCTOR);
 
         userRepository.save(newInstructor);
 
+        pendingInstructors.remove(email);
+
         emailServiceImpl.sendConfirmationEmail(
-                newInstructor.getEmail(),
-                "Cadastro Confirmado",
-                "Seu cadastro como instrutor foi confirmado com sucesso!"
+                adminEmail,
+                "Cadastro de Instrutor Confirmado",
+                String.format("O cadastro do instrutor %s (%s) foi confirmado com sucesso.", instructorDTO.getName(), instructorDTO.getEmail())
+        );
+
+        String instructorEmailBody = String.format(
+                "Olá, %s!\n\n" +
+                        "Seu cadastro como instrutor na plataforma foi aprovado!\n\n" +
+                        "Aqui estão seus dados de acesso:\n" +
+                        "E-mail: %s\n" +
+                        "Senha temporária: %s\n\n" +
+                        "Recomendamos que você altere sua senha após o primeiro login.\n\n" +
+                        "Bem-vindo à plataforma!",
+                instructorDTO.getName(), instructorDTO.getEmail(), temporaryPassword
+        );
+
+        emailServiceImpl.sendConfirmationEmail(
+                instructorDTO.getEmail(),
+                "Cadastro Aprovado - Bem-vindo à Plataforma!",
+                instructorEmailBody
         );
     }
 }
