@@ -9,6 +9,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
 @Service
@@ -20,11 +21,13 @@ public class S3ServiceImpl {
         this.s3Client = s3Client;
     }
 
-    public void uploadFile(String bucketName, String keyName, File file) {
+    public String uploadFile(String bucketName, String keyName, InputStream inputStream) throws IOException {
         s3Client.putObject(PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(keyName)
-                .build(), RequestBody.fromFile(file));
+                .build(), RequestBody.fromInputStream(inputStream, inputStream.available()));
+
+        return "https://" + bucketName + ".s3.amazonaws.com/" + keyName;
     }
 
     public InputStream getFileStream(GetObjectRequest getObjectRequest) {
@@ -35,4 +38,6 @@ public class S3ServiceImpl {
     public void deleteFile(String bucketName, String keyName) {
         s3Client.deleteObject(builder -> builder.bucket(bucketName).key(keyName).build());
     }
+
+
 }

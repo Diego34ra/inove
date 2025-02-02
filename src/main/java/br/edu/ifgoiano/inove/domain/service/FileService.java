@@ -15,4 +15,8 @@ public interface FileService {
     InputStream stream(String fileName);
 
     void delete(Long courseId, Long sectionId, Long contentId);
+
+    String uploadCourseImage(MultipartFile file, Long courseId) throws IOException;
+
+    String previewCourseImage(Long courseId) throws IOException;
 }

@@ -28,6 +28,9 @@ public class Course {
 
     private LocalDateTime lastUpdateDate;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @ManyToMany
     @JoinTable(name = "tb_student_course",
             joinColumns = @JoinColumn(name = "course_id"),

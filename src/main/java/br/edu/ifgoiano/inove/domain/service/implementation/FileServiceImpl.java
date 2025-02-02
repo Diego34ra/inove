@@ -2,8 +2,11 @@ package br.edu.ifgoiano.inove.domain.service.implementation;
 
 import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
 import br.edu.ifgoiano.inove.controller.dto.request.content.ContentSimpleRequestDTO;
+import br.edu.ifgoiano.inove.controller.exceptions.ResourceNotFoundException;
 import br.edu.ifgoiano.inove.domain.model.Content;
+import br.edu.ifgoiano.inove.domain.model.Course;
 import br.edu.ifgoiano.inove.domain.service.ContentService;
+import br.edu.ifgoiano.inove.domain.service.CourseService;
 import br.edu.ifgoiano.inove.domain.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +16,11 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Base64;
 
 @Service
 public class FileServiceImpl implements FileService{
@@ -34,26 +39,26 @@ public class FileServiceImpl implements FileService{
     @Autowired
     private ContentService contentService;
 
+    @Autowired
+    private CourseService courseService;
+
+    private final String BUCKET_NAME = "inove-bucket-streaming";
+
     @Override
     public String upload(MultipartFile file, Long courseId, Long sectionId, ContentSimpleRequestDTO contentDTO) throws IOException {
-//        MultipartFile file = contentDTO.getFile();
-
-        Path tempFile = Files.createTempFile("temp-", file.getOriginalFilename());
-        Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
-
         String keyName = file.getOriginalFilename();
-        s3Service.uploadFile(bucketName, keyName, tempFile.toFile());
 
-        Files.delete(tempFile);
+        String fileUrl = s3Service.uploadFile(bucketName, keyName, file.getInputStream());
 
         Content newContent = mapper.mapTo(contentDTO, Content.class);
-        newContent.setFileUrl("https://" + bucketName + ".s3.amazonaws.com/" + keyName);
+        newContent.setFileUrl(fileUrl);
         newContent.setFileName(keyName);
 
         contentService.create(courseId, sectionId, newContent);
 
         return "Sucesso no upload do arquivo!";
     }
+
 
     @Override
     public InputStream stream(String fileName) {
@@ -74,6 +79,28 @@ public class FileServiceImpl implements FileService{
         contentService.deleteById(courseId, sectionId);
 
         System.out.println("Todas as referências do arquivo foram deletadas!");
+    }
+
+    @Override
+    public String uploadCourseImage(MultipartFile file, Long courseId) throws IOException {
+        String fileName = "cursos/" + courseId + "/imagem-" + System.currentTimeMillis() + "-" + file.getOriginalFilename();
+
+        String imageUrl = s3Service.uploadFile(BUCKET_NAME, fileName, file.getInputStream());
+
+        courseService.updateCourseImage(courseId, imageUrl);
+
+        return imageUrl;
+    }
+
+    @Override
+    public String previewCourseImage(Long courseId) {
+        Course course = courseService.findById(courseId);
+
+        if (course.getImageUrl() == null || course.getImageUrl().isEmpty()) {
+            throw new RuntimeException("Imagem não encontrada para o curso.");
+        }
+
+        return course.getImageUrl();
     }
 
 }
