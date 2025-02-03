@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,17 +48,17 @@ public class ContentController {
         return ResponseEntity.status(HttpStatus.OK).body(savedContent);
     }
 
-//    @PostMapping
-//    @Operation(summary = "Adiciona um conteudo")
-//    @ApiResponses({
-//            @ApiResponse(responseCode = "201", description = "Coteudo adicionado com sucesso.",content = { @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = Content.class))}),
-//            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
-//    })
-//    public ContentOutputDTO create(@PathVariable Long courseId,
-//                          @PathVariable Long sectionId,
-//                          @RequestBody @Validated ContentInputDTO newContent){
-//        return contentService.create(courseId, sectionId, newContent);
-//    }
+    @PostMapping
+    @Operation(summary = "Adiciona um conteudo")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Coteudo adicionado com sucesso.",content = { @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = Content.class))}),
+            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+    })
+    public ContentOutputDTO create(@PathVariable Long courseId,
+                          @PathVariable Long sectionId,
+                          @RequestBody @Validated ContentRequestDTO newContent){
+        return contentService.create(courseId, sectionId, newContent);
+    }
 
     @PutMapping("/{contentId}")
     @Operation(summary = "Atualiza um conteudo")

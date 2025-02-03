@@ -57,7 +57,8 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     @Transactional
-    public ContentOutputDTO create(Long courseId, Long sectionId, Content newContent) {
+    public ContentOutputDTO create(Long courseId, Long sectionId, ContentRequestDTO newContentDTO) {
+        Content newContent = mapper.mapTo(newContentDTO, Content.class);
         newContent.setSection(sectionService.findByIdAndCursoId(courseId, sectionId));
         courseService.saveUpdateDate(courseId);
         return mapper.mapTo(contentRepository.save(newContent), ContentOutputDTO.class);
