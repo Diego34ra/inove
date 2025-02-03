@@ -18,8 +18,10 @@ import br.edu.ifgoiano.inove.domain.service.SchoolService;
 import br.edu.ifgoiano.inove.domain.service.UserService;
 import br.edu.ifgoiano.inove.domain.utils.InoveUtils;
 import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,7 +29,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -45,6 +49,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+    private EmailServiceImpl emailServiceImpl;
+
+    @Value("${admin.email}")
+    private String adminEmail;
+
+    private final Map<String, InstructorRequestDTO> pendingInstructors = new HashMap<>();
 
     @Override
     public List<UserSimpleResponseDTO> list() {
@@ -158,20 +170,31 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public UserResponseDTO subscribeStudent(Long userId, Long courseId) {
-
-        User user =  findById(userId);
+        User user = findById(userId);
         Course course = courseService.findById(courseId);
+
+        boolean alreadyEnrolled = user.getStudent_courses().stream()
+                .anyMatch(c -> c.getId().equals(courseId));
+        if (alreadyEnrolled) {
+            throw new ResourceBadRequestException("Usuário já está inscrito neste curso.");
+        }
 
         user.getStudent_courses().add(course);
 
         return mapper.mapTo(userRepository.save(user), UserResponseDTO.class);
     }
 
+
     @Override
     public List<CourseSimpleResponseDTO> getStudentCourses(Long userId) {
-        return mapper.toList(userRepository.findById(userId).get().getStudent_courses(), CourseSimpleResponseDTO.class);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado para listar cursos."));
+
+        return mapper.toList(user.getStudent_courses(), CourseSimpleResponseDTO.class);
     }
+
 
     @Override
     public UserDetails findByEmail(String email) {
@@ -181,5 +204,82 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByEmail(username);
+    }
+
+    @Override
+    @Transactional
+    public void removeCourseFromUser(Long userId, Long courseId) {
+        User user = findById(userId);
+        boolean removed = user.getStudent_courses().removeIf(course -> course.getId().equals(courseId)); // Remove o curso
+
+        if (!removed) {
+            throw new ResourceNotFoundException("Curso não encontrado na lista do usuário.");
+        }
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public void processInstructorRequest(InstructorRequestDTO instructorDTO) {
+        if (userRepository.existsByEmail(instructorDTO.getEmail())) {
+            throw new ResourceBadRequestException("E-mail já cadastrado.");
+        }
+
+        pendingInstructors.put(instructorDTO.getEmail(), instructorDTO);
+
+        String emailBody = String.format(
+                "Nome: %s\nCPF: %s\nE-mail: %s\nMotivação: %s\n\n" +
+                        "Clique no link para confirmar o cadastro: http://localhost:8080/api/inove/usuarios/instrutor/confirmar?email=%s",
+                instructorDTO.getName(), instructorDTO.getCpf(), instructorDTO.getEmail(), instructorDTO.getMotivation(),
+                instructorDTO.getEmail()
+        );
+
+        emailServiceImpl.sendConfirmationEmail(adminEmail, "Novo Cadastro de Instrutor", emailBody);
+    }
+
+    @Override
+    @Transactional
+    public void confirmInstructorRegistration(String email) {
+        InstructorRequestDTO instructorDTO = pendingInstructors.get(email);
+        if (instructorDTO == null) {
+            throw new ResourceNotFoundException("Solicitação de cadastro não encontrada.");
+        }
+
+        String temporaryPassword = RandomStringUtils.randomAlphanumeric(8);
+        String encryptedPassword = new BCryptPasswordEncoder().encode(temporaryPassword);
+
+        User newInstructor = new User();
+        newInstructor.setName(instructorDTO.getName());
+        newInstructor.setCpf(instructorDTO.getCpf());
+        newInstructor.setEmail(instructorDTO.getEmail());
+        newInstructor.setPassword(encryptedPassword);
+        newInstructor.setRole(UserRole.INSTRUCTOR);
+
+        userRepository.save(newInstructor);
+
+        pendingInstructors.remove(email);
+
+        emailServiceImpl.sendConfirmationEmail(
+                adminEmail,
+                "Cadastro de Instrutor Confirmado",
+                String.format("O cadastro do instrutor %s (%s) foi confirmado com sucesso.", instructorDTO.getName(), instructorDTO.getEmail())
+        );
+
+        String instructorEmailBody = String.format(
+                "Olá, %s!\n\n" +
+                        "Seu cadastro como instrutor na plataforma foi aprovado!\n\n" +
+                        "Aqui estão seus dados de acesso:\n" +
+                        "E-mail: %s\n" +
+                        "Senha temporária: %s\n\n" +
+                        "Recomendamos que você altere sua senha após o primeiro login.\n\n" +
+                        "Bem-vindo à plataforma!",
+                instructorDTO.getName(), instructorDTO.getEmail(), temporaryPassword
+        );
+
+        emailServiceImpl.sendConfirmationEmail(
+                instructorDTO.getEmail(),
+                "Cadastro Aprovado - Bem-vindo à Plataforma!",
+                instructorEmailBody
+        );
     }
 }

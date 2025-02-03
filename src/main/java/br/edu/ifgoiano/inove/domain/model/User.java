@@ -34,6 +34,8 @@ public class User implements UserDetails {
 
     private Date birthDate;
 
+    private String motivation;
+
     @ManyToOne
     @JoinColumn(name = "school_id")
     private School school;

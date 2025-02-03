@@ -5,6 +5,7 @@ import br.edu.ifgoiano.inove.controller.dto.response.course.CourseSimpleResponse
 import br.edu.ifgoiano.inove.domain.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -75,4 +76,17 @@ public class CourseController {
         cursoService.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @GetMapping("/instrutor/{instructorId}")
+    @Operation(summary = "Listar cursos de um instrutor")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cursos listados com sucesso.",
+                    content = { @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = CourseSimpleResponseDTO.class))) }),
+            @ApiResponse(responseCode = "401", description = "Acesso negado.", content = @Content)
+    })
+    public ResponseEntity<List<CourseSimpleResponseDTO>> listInstructorCourses(@PathVariable Long instructorId) {
+        return ResponseEntity.status(HttpStatus.OK).body(cursoService.findCoursesByInstructor(instructorId));
+    }
+
 }

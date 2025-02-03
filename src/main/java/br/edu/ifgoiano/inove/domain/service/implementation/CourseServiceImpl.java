@@ -73,4 +73,24 @@ public class CourseServiceImpl implements CourseService {
         course.setLastUpdateDate(LocalDateTime.now());
         return cursoRepository.save(course);
     }
+
+    @Override
+    public void updateCourseImage(Long courseId, String imageUrl) {
+        Course course = findById(courseId);
+        course.setImageUrl(imageUrl);
+        cursoRepository.save(course);
+    }
+
+    @Override
+    public String getCourseImageUrl(Long courseId) {
+        Course course = findById(courseId);
+        return course.getImageUrl();
+    }
+
+    @Override
+    public List<CourseSimpleResponseDTO> findCoursesByInstructor(Long instructorId) {
+        List<Course> courses = cursoRepository.findByInstructorId(instructorId);
+        return mapper.toList(courses, CourseSimpleResponseDTO.class);
+    }
+
 }

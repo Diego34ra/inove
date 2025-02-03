@@ -19,5 +19,5 @@ public class UserRequestDTO {
     @Email(message = "O email é inválido")
     private String email;
     private String password;
-    private UserRole userRole;
+    private UserRole role;
 }

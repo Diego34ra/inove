@@ -47,7 +47,9 @@ public interface UserService {
 
     List<CourseSimpleResponseDTO> getStudentCourses(Long userId);
 
-//    UserDetails loadByUsername(String username) throws UsernameNotFoundException;
-//
-//    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+    void removeCourseFromUser(Long userId, Long courseId);
+
+    void processInstructorRequest(InstructorRequestDTO instructorDTO);
+
+    void confirmInstructorRegistration(String email);
 }

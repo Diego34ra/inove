@@ -165,4 +165,29 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userService.getStudentCourses(userId));
     }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{userId}/cursos/{courseId}")
+    @Operation(summary = "Remove um curso de um usuário")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Curso removido com sucesso."),
+            @ApiResponse(responseCode = "401", description = "Acesso negado.", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))}),
+            @ApiResponse(responseCode = "404", description = "Usuário ou curso não encontrado.", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+    })
+    public ResponseEntity<Void> removeCourseFromUser(@PathVariable Long userId, @PathVariable Long courseId) {
+        userService.removeCourseFromUser(userId, courseId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/instrutor")
+    public ResponseEntity<String> createInstructor(@RequestBody InstructorRequestDTO instructorDTO) {
+        userService.processInstructorRequest(instructorDTO);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Cadastro enviado para aprovação.");
+    }
+
+    @GetMapping("/instrutor/confirmar")
+    public ResponseEntity<String> confirmInstructor(@RequestParam String email) {
+        userService.confirmInstructorRegistration(email);
+        return ResponseEntity.status(HttpStatus.OK).body("Cadastro confirmado com sucesso.");
+    }
 }

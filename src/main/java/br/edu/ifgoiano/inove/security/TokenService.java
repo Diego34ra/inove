@@ -39,7 +39,8 @@ public class TokenService {
     public LoginResponseDTO getAuthentication(User user){
         var token  = generateToken(user,hourExpirationToken);
         var refreshToken  = generateToken(user,hourExpirationRefreshToken);
-        return new LoginResponseDTO(token,refreshToken);
+        Long userId = user.getId();
+        return new LoginResponseDTO(token,refreshToken,userId);
     }
 
     public LoginResponseDTO getRefreshToken(RefreshTokenDTO refreshTokenDTO){

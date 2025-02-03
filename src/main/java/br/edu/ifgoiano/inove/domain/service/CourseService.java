@@ -22,4 +22,10 @@ public interface CourseService {
     void delete(Long courseId);
 
     Course saveUpdateDate(Long courseId);
+
+    void updateCourseImage(Long courseId, String imageUrl);
+
+    String getCourseImageUrl(Long courseId);
+
+    List<CourseSimpleResponseDTO> findCoursesByInstructor(Long instructorId);
 }
