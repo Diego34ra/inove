@@ -15,7 +15,7 @@ public interface ContentService {
 
     ContentOutputDTO findOneById(Long sectionId, Long contentId);
 
-    ContentOutputDTO create (Long courseId, Long sectionId, Content newContent);
+    ContentOutputDTO create (Long courseId, Long sectionId, ContentRequestDTO newContent);
 
     ContentOutputDTO update (Long courseId, Long sectionId, Long contentId, ContentRequestDTO newContent);
 

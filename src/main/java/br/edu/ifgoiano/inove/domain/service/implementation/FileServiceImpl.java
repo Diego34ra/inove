@@ -1,6 +1,7 @@
 package br.edu.ifgoiano.inove.domain.service.implementation;
 
 import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
+import br.edu.ifgoiano.inove.controller.dto.request.content.ContentRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.request.content.ContentSimpleRequestDTO;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceNotFoundException;
 import br.edu.ifgoiano.inove.domain.model.Content;
@@ -50,7 +51,7 @@ public class FileServiceImpl implements FileService{
 
         String fileUrl = s3Service.uploadFile(bucketName, keyName, file.getInputStream());
 
-        Content newContent = mapper.mapTo(contentDTO, Content.class);
+        ContentRequestDTO newContent = mapper.mapTo(contentDTO, ContentRequestDTO.class);
         newContent.setFileUrl(fileUrl);
         newContent.setFileName(keyName);
 
