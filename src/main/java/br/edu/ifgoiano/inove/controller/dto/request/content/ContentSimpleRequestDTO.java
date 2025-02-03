@@ -16,4 +16,5 @@ public class ContentSimpleRequestDTO {
     private String title;
     private String description;
     private ContentType contentType;
+    private String fileName;
 }

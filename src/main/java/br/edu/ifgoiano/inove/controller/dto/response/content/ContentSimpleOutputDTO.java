@@ -16,4 +16,6 @@ public class ContentSimpleOutputDTO {
     private String description;
 
     private String title;
+
+    private String fileName;
 }
