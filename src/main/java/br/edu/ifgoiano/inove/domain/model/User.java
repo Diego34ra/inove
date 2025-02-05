@@ -1,5 +1,6 @@
 package br.edu.ifgoiano.inove.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -58,6 +59,10 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "course_id"))
     private List<Course> instructor_courses;
 
+    @OneToMany(mappedBy = "student")
+    @JsonIgnoreProperties("student")
+    private List<FeedBack> feedbacks;
+
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
@@ -67,8 +72,11 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(this.role == UserRole.ADMINISTRATOR) return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
-        else return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        if(this.role == UserRole.ADMINISTRATOR)
+            return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_STUDENT"));
+        else if(this.role == UserRole.INSTRUCTOR)
+            return List.of(new SimpleGrantedAuthority("ROLE_INSTRUCTOR"), new SimpleGrantedAuthority("ROLE_STUDENT"));
+        else return List.of(new SimpleGrantedAuthority("ROLE_STUDENT"));
     }
 
     @Override

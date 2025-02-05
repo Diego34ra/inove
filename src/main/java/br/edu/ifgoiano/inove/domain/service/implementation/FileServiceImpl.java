@@ -47,29 +47,26 @@ public class FileServiceImpl implements FileService{
 
     @Override
     public String upload(MultipartFile file, Long courseId, Long sectionId, ContentSimpleRequestDTO contentDTO) throws IOException {
-        String keyName = file.getOriginalFilename();
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("O arquivo não pode ser vazio!");
+        }
 
+        String keyName = System.currentTimeMillis() + "-" + file.getOriginalFilename();
         String fileUrl = s3Service.uploadFile(bucketName, keyName, file.getInputStream());
 
-        ContentRequestDTO newContent = mapper.mapTo(contentDTO, ContentRequestDTO.class);
-        newContent.setFileUrl(fileUrl);
-        newContent.setFileName(keyName);
+        ContentRequestDTO newContentDTO = new ContentRequestDTO(
+                contentDTO.getDescription(),
+                contentDTO.getTitle(),
+                contentDTO.getContentType(),
+                fileUrl,
+                keyName
+        );
 
-        contentService.create(courseId, sectionId, newContent);
-
-        return "Sucesso no upload do arquivo!";
+        contentService.create(courseId, sectionId, newContentDTO);
+        return "Upload e criação de conteúdo realizados com sucesso!";
     }
 
 
-    @Override
-    public InputStream stream(String fileName) {
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .build();
-
-        return s3Service.getFileStream(getObjectRequest);
-    }
 
     @Override
     public void delete(Long courseId, Long sectionId, Long contentId) {
@@ -102,6 +99,11 @@ public class FileServiceImpl implements FileService{
         }
 
         return course.getImageUrl();
+    }
+
+    @Override
+    public InputStream getFile(String fileName) throws IOException {
+        return s3Service.getFile(bucketName, fileName);
     }
 
 }

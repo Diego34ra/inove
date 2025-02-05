@@ -7,13 +7,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class ContentSimpleRequestDTO {
-
     private String title;
     private String description;
     private ContentType contentType;
+    private String fileUrl;
+    private String fileName;
+
+    public ContentSimpleRequestDTO(String title, String description, ContentType contentType) {
+        this.title = title;
+        this.description = description;
+        this.contentType = contentType;
+    }
 }

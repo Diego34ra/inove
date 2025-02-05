@@ -23,11 +23,11 @@ public class Content {
 
     private String title;
 
-    private ContentType contentType; // VIDEO, PDF
+    private ContentType contentType;
 
-    private String fileUrl; // URL do arquivo no S3
+    private String fileUrl;
 
-    private String fileName; // Nome do arquivo no S3
+    private String fileName;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)

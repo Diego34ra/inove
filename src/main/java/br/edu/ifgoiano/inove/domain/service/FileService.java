@@ -12,11 +12,11 @@ public interface FileService {
                   Long sectionId,
                   ContentSimpleRequestDTO contentDTO) throws IOException;
 
-    InputStream stream(String fileName);
-
     void delete(Long courseId, Long sectionId, Long contentId);
 
     String uploadCourseImage(MultipartFile file, Long courseId) throws IOException;
 
     String previewCourseImage(Long courseId) throws IOException;
+
+    InputStream getFile(String fileName) throws IOException;
 }

@@ -35,57 +35,69 @@ public class SecurityConfiguration {
                 .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(
-                        authorize -> authorize
-                                .requestMatchers(SWAGGER_WHITELIST).permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/inove/auth/**").permitAll()
+                .authorizeHttpRequests(authorize -> authorize
 
-                                // Usuários
-                                .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/discente").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/**").permitAll()
-                                .requestMatchers(HttpMethod.PUT, "/api/inove/usuarios/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/inove/usuarios/instrutor/confirmar").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/inove/escolas/").permitAll()
+                        // SWAGGER
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
 
-                                // Escolas
-                                .requestMatchers(HttpMethod.POST, "/api/inove/escolas/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/inove/escolas/**").permitAll()
-                                .requestMatchers(HttpMethod.PUT, "/api/inove/escolas/**").permitAll()
+                        // AUTENTICAÇÃO
+                        .requestMatchers(HttpMethod.POST, "/api/inove/auth/**").permitAll()
 
-                                // Cursos
-                                .requestMatchers(HttpMethod.GET, "/api/inove/cursos/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/inscreverse").hasRole("STUDENT")
-                                .requestMatchers(HttpMethod.DELETE, "/api/inove/usuarios/{userId}/cursos/{courseId}").permitAll()
-                                .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/**").hasRole("ADMINISTRATOR")
-                                .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/**").hasRole("ADMINISTRATOR")
-                                .requestMatchers(HttpMethod.GET, "/api/inove/usuarios/{userId}/cursos").permitAll()
+                        // USUÁRIOS
+                        .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/discente").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/inove/usuarios/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/inove/usuarios/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/inove/usuarios/instrutor/confirmar").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/inove/usuarios/{userId}/cursos").permitAll()
 
+                        // ESCOLAS
+                        .requestMatchers(HttpMethod.POST, "/api/inove/escolas/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/inove/escolas/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/inove/escolas/**").permitAll()
 
-                                // Seções
-                                .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
-                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
-                                .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
-                                .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                        // CURSOS
+                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/**").permitAll()
 
-                                // Conteúdo
-                                .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
-                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
-                                .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").permitAll()
-                                .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
-                                .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
+                        // UPLOAD DE IMAGEM DE CURSOS
+                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/upload-imagem-curso").hasRole("INSTRUCTOR")
+                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/preview-imagem").permitAll()
 
-//                                .requestMatchers(HttpMethod.POST, "/api/inove/**").permitAll()
-                                .anyRequest().authenticated()
+                        // SEÇÕES
+                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+
+                        // CONTEÚDO
+                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").hasRole("INSTRUCTOR")
+                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").hasRole("INSTRUCTOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
+
+                        // UPLOAD DE CONTEÚDO (PDF/VÍDEO)
+
+                        // STREAM DE CONTEÚDO
+                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/secoes/conteudos/stream/{fileName}").permitAll()
+
+                        // FEEDBACKS
+                        .requestMatchers(HttpMethod.GET, "/api/inove/feedbacks/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/inove/feedbacks/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/inove/feedbacks/{feedbackId}").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/inove/feedbacks/{feedbackId}").permitAll()
+
+                        .anyRequest().permitAll()
                 )
-                .exceptionHandling(httpSecurityExceptionHandlingConfigurer ->
-                        httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(accessDeniedException()))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(accessDeniedException()))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public AuthenticationEntryPoint accessDeniedException(){
+    public AuthenticationEntryPoint accessDeniedException() {
         return new CustomAuthenticationEntryPoint();
     }
 
@@ -95,7 +107,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

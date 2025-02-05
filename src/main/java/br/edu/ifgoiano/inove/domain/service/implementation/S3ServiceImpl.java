@@ -30,14 +30,15 @@ public class S3ServiceImpl {
         return "https://" + bucketName + ".s3.amazonaws.com/" + keyName;
     }
 
-    public InputStream getFileStream(GetObjectRequest getObjectRequest) {
-        ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getObjectRequest);
-        return s3Object;
+    public InputStream getFile(String bucketName, String keyName) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build();
+        return s3Client.getObject(getObjectRequest);
     }
 
     public void deleteFile(String bucketName, String keyName) {
         s3Client.deleteObject(builder -> builder.bucket(bucketName).key(keyName).build());
     }
-
-
 }
