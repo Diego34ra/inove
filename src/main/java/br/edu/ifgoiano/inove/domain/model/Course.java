@@ -1,5 +1,6 @@
 package br.edu.ifgoiano.inove.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -30,6 +31,10 @@ public class Course {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    @OneToMany(mappedBy = "course")
+    @JsonIgnoreProperties("course")
+    private List<FeedBack> feedbacks;
 
     @ManyToMany
     @JoinTable(name = "tb_student_course",

@@ -47,8 +47,13 @@ public class FileServiceImpl implements FileService{
 
     @Override
     public String upload(MultipartFile file, Long courseId, Long sectionId, ContentSimpleRequestDTO contentDTO) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("O arquivo não pode ser vazio!");
+        }
+
         String keyName = System.currentTimeMillis() + "-" + file.getOriginalFilename();
         String fileUrl = s3Service.uploadFile(bucketName, keyName, file.getInputStream());
+
         ContentRequestDTO newContentDTO = new ContentRequestDTO(
                 contentDTO.getDescription(),
                 contentDTO.getTitle(),
@@ -56,9 +61,11 @@ public class FileServiceImpl implements FileService{
                 fileUrl,
                 keyName
         );
+
         contentService.create(courseId, sectionId, newContentDTO);
-        return "Upload realizado com sucesso!";
+        return "Upload e criação de conteúdo realizados com sucesso!";
     }
+
 
 
     @Override

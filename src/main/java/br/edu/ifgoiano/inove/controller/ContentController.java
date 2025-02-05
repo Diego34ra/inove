@@ -1,10 +1,13 @@
 package br.edu.ifgoiano.inove.controller;
 
 import br.edu.ifgoiano.inove.controller.dto.request.content.ContentRequestDTO;
+import br.edu.ifgoiano.inove.controller.dto.request.content.ContentSimpleRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.content.ContentOutputDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.content.ContentSimpleOutputDTO;
 import br.edu.ifgoiano.inove.domain.model.Content;
+import br.edu.ifgoiano.inove.domain.model.ContentType;
 import br.edu.ifgoiano.inove.domain.service.ContentService;
+import br.edu.ifgoiano.inove.domain.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,14 +18,47 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos")
 public class ContentController {
     @Autowired
     private ContentService contentService;
+
+    @Autowired
+    private FileService fileService;
+
+    @PostMapping("/upload")
+    public ResponseEntity<?> createContentWithFile(
+            @PathVariable Long courseId,
+            @PathVariable Long sectionId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("contentType") ContentType contentType) {
+
+        try {
+            ContentSimpleRequestDTO contentDTO = new ContentSimpleRequestDTO(title, description, contentType, null, null);
+            String uploadMessage = fileService.upload(file, courseId, sectionId, contentDTO);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", uploadMessage);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IOException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Erro ao processar o arquivo.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+
 
     @GetMapping
     @Operation(summary = "Listar conteudos")

@@ -1,5 +1,6 @@
 package br.edu.ifgoiano.inove.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -57,6 +58,10 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "instructor_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id"))
     private List<Course> instructor_courses;
+
+    @OneToMany(mappedBy = "student")
+    @JsonIgnoreProperties("student")
+    private List<FeedBack> feedbacks;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;

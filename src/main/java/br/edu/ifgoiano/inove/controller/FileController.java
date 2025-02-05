@@ -25,21 +25,6 @@ public class FileController {
     @Autowired
     private FileService fileService;
 
-    @PostMapping("/upload/{courseId}/{sectionId}")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
-                                             @PathVariable Long courseId,
-                                             @PathVariable Long sectionId,
-                                             ContentSimpleRequestDTO contentDTO) {
-        try {
-            return ResponseEntity.ok(fileService.upload(file, courseId, sectionId, contentDTO));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save the file temporarily.");
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload file to S3.");
-        }
-    }
-
     private static final Map<String, String> MIME_TYPES = new HashMap<>() {{
         put("mp4", "video/mp4");
         put("pdf", "application/pdf");
