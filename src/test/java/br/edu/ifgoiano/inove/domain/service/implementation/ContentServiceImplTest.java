@@ -150,6 +150,9 @@ class ContentServiceImplTest {
         Content content = new Content();
         content.setTitle("Conteudo teste");
 
+        ContentRequestDTO contentRequestDTO = new ContentRequestDTO();
+        content.setTitle("Conteudo teste");
+
         Section section = new Section();
         section.setId(1L);
         section.setTitle("Seção teste");
@@ -164,10 +167,10 @@ class ContentServiceImplTest {
 
         when(sectionService.findByIdAndCursoId(1L, 1L)).thenReturn(section);
         when(contentRepository.save(content)).thenReturn(contentCreate);
-        when(courseService.saveUpdateDate(1L)).thenReturn(new Course());
+        when(mapper.mapTo(contentRequestDTO, Content.class)).thenReturn(content);
         when(mapper.mapTo(contentCreate, ContentOutputDTO.class)).thenReturn(contentRetorno);
 
-        ContentOutputDTO resultado = contentService.create(1L,1L,content);
+        ContentOutputDTO resultado = contentService.create(1L,1L,contentRequestDTO);
 
         assertNotNull(resultado);
         assertEquals(resultado.getId(),contentRetorno.getId(),"O ID do conteúdo retornado está incorreto");
