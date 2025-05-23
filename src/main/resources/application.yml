@@ -6,14 +6,14 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
   datasource:
-    url: jdbc:mysql://localhost:3306/inove?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
-    username: root
-    password: 123
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:mem:inove;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
     show-sql: true
@@ -28,6 +28,21 @@ spring:
         secret: ${JWT_SECRET:my-secret-key}
       refresh-token:
         expiration: 8
+
+# Configuração do MySQL comentada
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/inove?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
+#    username: root
+#    password: 123
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#  jpa:
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQL8Dialect
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+
 springdoc:
   swagger-ui:
     tags-sorter: method
@@ -35,7 +50,7 @@ springdoc:
 cloud:
   aws:
     credentials:
-      access-key: 
+      access-key:
       secret-key:
     region:
       static: us-east-1
