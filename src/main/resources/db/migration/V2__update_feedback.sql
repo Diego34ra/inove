@@ -1,2 +1,2 @@
-alter table tb_course add column creation_date datetime(6);
-alter table tb_course add column last_update_date datetime(6);
+ALTER TABLE tb_course ADD COLUMN creation_date     timestamp(6);
+ALTER TABLE tb_course ADD COLUMN last_update_date  timestamp(6);
