@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,5 +107,4 @@ public class FileServiceImpl implements FileService{
     public InputStream getFile(String fileName) throws IOException {
         return s3Service.getFile(bucketName, fileName);
     }
-
 }
