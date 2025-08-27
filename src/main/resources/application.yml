@@ -6,17 +6,17 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
   datasource:
-    url: jdbc:mysql://localhost:3306/inove?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
-    username: root
+    url: jdbc:postgresql://localhost:5432/inove
+    username: postgres
     password: 123
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -35,7 +35,7 @@ springdoc:
 cloud:
   aws:
     credentials:
-      access-key: 
+      access-key:
       secret-key:
     region:
       static: us-east-1
