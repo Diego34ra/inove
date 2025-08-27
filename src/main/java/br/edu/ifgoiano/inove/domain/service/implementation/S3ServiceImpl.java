@@ -4,9 +4,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,4 +39,15 @@ public class S3ServiceImpl {
     public void deleteFile(String bucketName, String keyName) {
         s3Client.deleteObject(builder -> builder.bucket(bucketName).key(keyName).build());
     }
+
+    public long getObjectSize(String bucketName, String keyName) {
+        HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build();
+
+        HeadObjectResponse headObjectResponse = s3Client.headObject(headObjectRequest);
+        return headObjectResponse.contentLength();
+    }
+
 }
