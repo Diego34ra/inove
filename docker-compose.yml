@@ -1,0 +1,38 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: inove
+    ports:
+      - "5432:5432"
+    networks:
+      - inove-network
+
+  app:
+    build: .
+    container_name: inove-app
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inove
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=my-secret-key
+      - AWS_ACCESS_KEY=
+      - AWS_SECRET_KEY=
+      - ADMIN_EMAIL=inoveprojetointegrador@gmail.com
+    ports:
+      - "8080:8080"
+    networks:
+      - inove-network
+
+networks:
+  inove-network:
+    driver: bridge
