@@ -23,6 +23,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -142,9 +144,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public List<UserResponseDTO> listAdmins() {
-        return mapper.toList(userRepository.findByRole(UserRole.ADMINISTRATOR.name())
-                , UserResponseDTO.class);
+    public Page<UserResponseDTO> listAdmins(Pageable pageable) {
+        return userRepository.findByRole(UserRole.ADMINISTRATOR, pageable);
     }
 
     @Override

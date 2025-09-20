@@ -18,6 +18,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +41,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Usuarios listados com sucesso.",
                     content = { @Content(mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = User.class)))}),
-            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+            @ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
     public List<UserSimpleResponseDTO> listUsers(){
         return userService.list();
@@ -51,10 +53,10 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Adiministradores listados com sucesso.",
                     content = { @Content(mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))}),
-            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+            @ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
-    public List<UserResponseDTO> listAdmins(){
-        return userService.listAdmins();
+    public Page<UserResponseDTO> listAdmins(@RequestParam Pageable pageable){
+        return userService.listAdmins(pageable);
     }
 
     @GetMapping("/discente")
@@ -63,7 +65,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Discentes listados com sucesso.",
                     content = { @Content(mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = StudentResponseDTO.class)))}),
-            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+            @ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
     public List<StudentResponseDTO> listStudents(){
         return userService.listStudents();
@@ -75,7 +77,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Instrutores listados com sucesso.",
                     content = { @Content(mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))}),
-            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+            @ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
     public List<UserResponseDTO> listInstructors(){
         return userService.listInstructors();
@@ -85,7 +87,7 @@ public class UserController {
     @Operation(summary = "Buscar um usuario")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Usuario encontrado com sucesso.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))}),
-            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
+            @ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
     public ResponseEntity<?> findUser(@PathVariable Long userId){
         try {

@@ -7,6 +7,8 @@ import br.edu.ifgoiano.inove.controller.dto.response.user.UserResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserSimpleResponseDTO;
 import br.edu.ifgoiano.inove.domain.model.User;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
@@ -31,7 +33,7 @@ public interface UserService {
 
     List<UserSimpleResponseDTO> listUserByRole(String role);
 
-    List<UserResponseDTO> listAdmins();
+    Page<UserResponseDTO> listAdmins(Pageable pageable);
 
     List<StudentResponseDTO> listStudents();
 
