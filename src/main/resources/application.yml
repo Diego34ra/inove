@@ -15,18 +15,18 @@ spring:
       ddl-auto: update
     open-in-view: false
 
+  api:
+    security:
+      token:
+        expiration: 1
+        secret: ${JWT_SECRET}
+      refresh-token:
+        expiration: 8
+
 springdoc:
   swagger-ui:
     tags-sorter: method
     operations-sorter: alpha
-
-api:
-  security:
-    token:
-      expiration: 1
-      secret: ${JWT_SECRET}
-    refresh-token:
-      expiration: 8
 
 cloud:
   aws:
@@ -42,7 +42,7 @@ mail:
   host: smtp.gmail.com
   port: 587
   username: inoveprojetointegrador@gmail.com
-  password: ${MAIL_PASSWORD} 
+  password: ${MAIL_PASSWORD}
   properties:
     mail:
       smtp:
