@@ -1,32 +1,38 @@
 spring:
   application:
     name: inove
-  profiles:
-    active: local   # profile padrão
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
-  api:
-    security:
-      token:
-        expiration: 1
-        secret: ${JWT_SECRET:my-secret-key}
-      refresh-token:
-        expiration: 8
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:inove}?sslmode=require}
+    username: ${PGUSER:postgres}
+    password: ${PGPASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
 
 springdoc:
   swagger-ui:
     tags-sorter: method
     operations-sorter: alpha
 
-
+api:
+  security:
+    token:
+      expiration: 1
+      secret: ${JWT_SECRET}
+    refresh-token:
+      expiration: 8
 
 cloud:
   aws:
     credentials:
-      accessKey: ${AWS_ACCESS_KEY}
-      secretKey: ${AWS_SECRET_KEY}
+      accessKey: ${AWS_ACCESS_KEY:}
+      secretKey: ${AWS_SECRET_KEY:}
     region:
       static: us-east-1
     s3:
@@ -36,7 +42,7 @@ mail:
   host: smtp.gmail.com
   port: 587
   username: inoveprojetointegrador@gmail.com
-  password: ${MAIL_PASSWORD:jwhg nbfe iiob lwvz }
+  password: ${MAIL_PASSWORD} 
   properties:
     mail:
       smtp:
