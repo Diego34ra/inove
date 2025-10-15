@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
 
 @Service
@@ -73,17 +74,13 @@ public class TokenService {
     public String validateToken(String token){
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.require(algorithm)
-                    .withIssuer("auth-api")
-                    .build()
-                    .verify(token)
-                    .getSubject();
-        } catch (JWTVerificationException exception){
-            return "";
+            return JWT.require(algorithm).withIssuer("auth-api").build().verify(token).getSubject();
+        } catch (JWTVerificationException e){
+            return null;
         }
     }
 
     private Instant genExpirationDate(Integer hour){
-        return LocalDateTime.now().plusHours(hour).toInstant(ZoneOffset.of("-03:00"));
+        return Instant.now().plus(hour, ChronoUnit.HOURS);
     }
 }

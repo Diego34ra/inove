@@ -28,9 +28,9 @@ VALUES
 -- Usuários (Admins, Instrutores, Estudantes)
 INSERT INTO tb_user (name, email, cpf, password, role, birth_date, school_id)
 VALUES
- ('Maria Admin', 'maria.admin@email.com', '11111111111', '$2a$10$z59MkvFkWYiWw677cC2rnefD.Zj6iwc1v1Ua6XQoEkh5aFF4ZBIn.', 'ADMINISTRATOR', '1990-01-01', 1),
- ('João Instrutor', 'joao.instrutor@email.com', '22222222222', '$2a$10$z59MkvFkWYiWw677cC2rnefD.Zj6iwc1v1Ua6XQoEkh5aFF4ZBIn.', 'INSTRUCTOR', '1985-05-10', 1),
- ('Ana Estudante', 'ana.estudante@email.com', '33333333333', '$2a$10$z59MkvFkWYiWw677cC2rnefD.Zj6iwc1v1Ua6XQoEkh5aFF4ZBIn.', 'STUDENT', '2000-09-20', 2);
+ ('Maria Admin', 'maria.admin@email.com', '11111111111', '$2a$10$zoFW2FRvgqERROr8mqatDOambxdTGNnqrLhhMI6KG.qtvRPO.Fove', 'ADMINISTRATOR', '1990-01-01', 1),
+ ('João Instrutor', 'joao.instrutor@email.com', '22222222222', '$2a$10$zoFW2FRvgqERROr8mqatDOambxdTGNnqrLhhMI6KG.qtvRPO.Fove', 'INSTRUCTOR', '1985-05-10', 1),
+ ('Ana Estudante', 'ana.estudante@email.com', '33333333333', '$2a$10$zoFW2FRvgqERROr8mqatDOambxdTGNnqrLhhMI6KG.qtvRPO.Fove', 'STUDENT', '2000-09-20', 2);
 
 -- Seções
 INSERT INTO tb_section (title, description, course_id)
