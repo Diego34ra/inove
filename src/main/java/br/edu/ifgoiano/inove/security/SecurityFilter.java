@@ -19,41 +19,57 @@ import java.io.IOException;
 public class SecurityFilter extends OncePerRequestFilter {
 
     @Autowired
-    TokenService tokenService;
+    private TokenService tokenService;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-        try {
-            String token = recoverToken(request);
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-            if (token != null && !token.isBlank()) {
-                String login = tokenService.validateToken(token);
-                if (login != null && !login.isBlank()) {
-                    UserDetails user = userService.findByEmail(login);
-                    if (user != null) {
-                        UsernamePasswordAuthenticationToken auth =
-                                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(auth);
-                    }
-                }
-            }
-        } catch (Exception ex) {
+        String token = recoverToken(request);
+
+        if (token == null || token.isBlank()) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        filterChain.doFilter(request, response);
-    }
+        try {
+            String login = tokenService.validateToken(token);
 
+            if (login != null && !login.isBlank()) {
+                UserDetails user = userService.findByEmail(login);
+
+                if (user != null) {
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    user, null, user.getAuthorities());
+                    authentication.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            }
+
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"invalid_or_expired_token\"}");
+        }
+    }
 
     private String recoverToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
-        if (header == null || !header.startsWith("Bearer ")) return null;
+        if (header == null || !header.startsWith("Bearer ")) {
+            return null;
+        }
         return header.substring(7);
     }
-
 }
+
