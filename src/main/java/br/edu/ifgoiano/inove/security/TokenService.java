@@ -24,13 +24,13 @@ import java.time.ZoneOffset;
 @Service
 public class TokenService {
 
-    @Value("${spring.api.security.token.secret}")
+    @Value("${api.security.token.secret}")
     private String secret;
 
-    @Value("${spring.api.security.token.expiration}")
+    @Value("${api.security.token.expiration}")
     private Integer hourExpirationToken;
 
-    @Value("${spring.api.security.refresh-token.expiration}")
+    @Value("${api.security.refresh-token.expiration}")
     private Integer hourExpirationRefreshToken;
 
     @Autowired
