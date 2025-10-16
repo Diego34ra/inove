@@ -22,10 +22,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private CourseRepository cursoRepository;
-
     @Autowired
     private MyModelMapper mapper;
-
     @Autowired
     private InoveUtils inoveUtils;
 
@@ -33,10 +31,7 @@ public class CourseServiceImpl implements CourseService {
     public CourseResponseDTO create(CourseRequestDTO courseDTO) {
         Course course = mapper.mapTo(courseDTO, Course.class);
         course.setCreationDate(LocalDateTime.now());
-        return mapper.mapTo(
-                cursoRepository.save(course),
-                CourseResponseDTO.class
-        );
+        return mapper.mapTo(cursoRepository.save(course), CourseResponseDTO.class);
     }
 
     @Override
@@ -51,6 +46,11 @@ public class CourseServiceImpl implements CourseService {
     public CourseResponseDTO findOneById(Long courseId) {
         var course = cursoRepository.findByIdWithInstructors(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum curso com esse id."));
+
+        if (course.getStudent() != null) {
+            course.getStudent().size();
+        }
+
         return mapper.mapTo(course, CourseResponseDTO.class);
     }
 
