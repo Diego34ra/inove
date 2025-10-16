@@ -56,33 +56,32 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.PUT, "/api/inove/escolas/**").permitAll()
 
                         // CURSOS
-                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/inove/cursos/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/inove/cursos/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/**").permitAll()
 
                         // UPLOAD DE IMAGEM DE CURSOS
-                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/upload-imagem-curso").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/preview-imagem").permitAll()
+                        //  .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/upload-imagem-curso").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/preview-imagem").permitAll()
 
                         // SEÇÕES
-                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
-                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
+                        // .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
 
                         // CONTEÚDO
-                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
-                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
+                        // .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
 
                         // UPLOAD DE CONTEÚDO (PDF/VÍDEO)
 
                         // STREAM DE CONTEÚDO
-                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/secoes/conteudos/stream/{fileName}").permitAll()
+                        //.requestMatchers(HttpMethod.GET, "/api/inove/cursos/secoes/conteudos/stream/{fileName}").permitAll()
 
                         // FEEDBACKS
                         .requestMatchers(HttpMethod.GET, "/api/inove/feedbacks/**").permitAll()
