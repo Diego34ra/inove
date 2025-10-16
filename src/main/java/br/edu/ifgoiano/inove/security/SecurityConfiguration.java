@@ -125,7 +125,8 @@ public class SecurityConfiguration {
         cfg.setAllowedOrigins(List.of(
                 "http://localhost:4200",
                 "https://inove.blog.br",
-                "https://www.inove.blog.br"
+                "https://www.inove.blog.br",
+                "https://*.vercel.app"
         ));
         cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
         cfg.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With","ngrok-skip-browser-warning"));
