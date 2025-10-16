@@ -27,6 +27,11 @@ public class SecurityFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
 
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             chain.doFilter(request, response);
             return;
@@ -55,6 +60,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         chain.doFilter(request, response);
     }
+
 
     private String recoverToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");

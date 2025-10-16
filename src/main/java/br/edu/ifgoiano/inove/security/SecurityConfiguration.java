@@ -122,19 +122,27 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowCredentials(true);
-        cfg.setAllowedOrigins(List.of(
+
+
+        cfg.setAllowedOriginPatterns(List.of(
                 "http://localhost:4200",
                 "https://inove.blog.br",
                 "https://www.inove.blog.br",
                 "https://*.vercel.app"
         ));
+
         cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
-        cfg.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With","ngrok-skip-browser-warning"));
+        cfg.setAllowedHeaders(List.of(
+                "Authorization","Content-Type","X-Requested-With",
+                "Origin","Accept","Access-Control-Request-Method","Access-Control-Request-Headers"
+        ));
         cfg.setExposedHeaders(List.of("Content-Disposition"));
+        cfg.setMaxAge(3600L); // cache do preflight
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
         return source;
     }
+
 
 }
