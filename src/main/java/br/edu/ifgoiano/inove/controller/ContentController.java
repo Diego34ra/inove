@@ -100,7 +100,6 @@ public class ContentController {
     @Operation(summary = "Atualiza um conteudo")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Coteudo atualizado com sucesso.",content = { @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = Content.class))}),
-            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
     public ResponseEntity<?> update(@PathVariable Long courseId,
                                     @PathVariable Long sectionId,
@@ -111,15 +110,45 @@ public class ContentController {
         return ResponseEntity.status(HttpStatus.OK).body(updatedContent);
     }
 
+    @PutMapping("/{contentId}/upload")
+    @Operation(summary = "Atualiza um conteudo com novo arquivo")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Conteudo e arquivo atualizados com sucesso."),
+    })
+    public ResponseEntity<?> updateContentWithFile(
+            @PathVariable Long courseId,
+            @PathVariable Long sectionId,
+            @PathVariable Long contentId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("contentType") ContentType contentType) {
+
+        try {
+            ContentSimpleRequestDTO contentDTO = new ContentSimpleRequestDTO(title, description, contentType, null, null);
+            String uploadMessage = fileService.updateContentFile(file, courseId, sectionId, contentId, contentDTO);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", uploadMessage);
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (IOException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Erro ao processar o arquivo.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{contentId}")
     @Operation(summary = "Remove um conteudo")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Conteudo deletado com sucesso."),
-            //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
-    public ResponseEntity<?> delete(@PathVariable Long sectionId,@PathVariable Long contentId){
-            contentService.deleteById(sectionId, contentId);
+    public ResponseEntity<?> delete(@PathVariable Long courseId,
+                                    @PathVariable Long sectionId,
+                                    @PathVariable Long contentId){
+            fileService.delete(courseId, sectionId, contentId);
             return ResponseEntity.noContent().build();
     }
 }

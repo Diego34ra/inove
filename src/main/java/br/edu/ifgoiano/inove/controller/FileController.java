@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -41,12 +40,14 @@ public class FileController {
         put("pdf", "application/pdf");
     }};
 
-    @GetMapping("/stream/{fileName}")
+    @GetMapping("/stream/**")
     public ResponseEntity<Resource> streamFile(
-            @PathVariable String fileName,
             HttpServletRequest request) {
 
         try {
+            String requestPath = request.getRequestURI();
+            String fileName = requestPath.substring(requestPath.indexOf("/stream/") + 8);
+
             String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
             String mimeType = MIME_TYPES.getOrDefault(extension, "application/octet-stream");
 
@@ -89,9 +90,12 @@ public class FileController {
         }
     }
 
-    @GetMapping("/type/{fileName}")
-    public ResponseEntity<?> getFileType(@PathVariable String fileName) {
+    @GetMapping("/type/**")
+    public ResponseEntity<?> getFileType(HttpServletRequest request) {
         try {
+            String requestPath = request.getRequestURI();
+            String fileName = requestPath.substring(requestPath.indexOf("/type/") + 6);
+
             String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
             String mimeType = MIME_TYPES.getOrDefault(extension, "application/octet-stream");
 
@@ -103,5 +107,3 @@ public class FileController {
     }
 
 }
-
-
