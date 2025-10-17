@@ -48,7 +48,7 @@ public class Course {
             inverseJoinColumns = @JoinColumn(name = "admin_id"))
     private List<User> admins;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "instructor_courses", fetch = FetchType.LAZY)
     @JoinTable(name = "tb_instructor_course",
             joinColumns = @JoinColumn(name = "course_id"),
             inverseJoinColumns = @JoinColumn(name = "instructor_id"))

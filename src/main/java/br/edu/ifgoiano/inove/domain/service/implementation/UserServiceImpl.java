@@ -189,7 +189,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public List<CourseSimpleResponseDTO> getStudentCourses(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithStudentCourses(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado para listar cursos."));
 
         return mapper.toList(user.getStudent_courses(), CourseSimpleResponseDTO.class);
