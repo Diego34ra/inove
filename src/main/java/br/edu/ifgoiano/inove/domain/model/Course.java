@@ -49,10 +49,7 @@ public class Course {
     private List<User> admins;
 
     @ManyToMany(mappedBy = "instructor_courses", fetch = FetchType.LAZY)
-    @JoinTable(name = "tb_instructor_course",
-            joinColumns = @JoinColumn(name = "course_id"),
-            inverseJoinColumns = @JoinColumn(name = "instructor_id"))
-    private List<User> instructors;
+    private Set<User> instructors;
 
     @OneToMany(mappedBy = "course")
     private List<FeedBack> feedBacks;

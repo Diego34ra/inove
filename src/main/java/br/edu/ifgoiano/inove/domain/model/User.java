@@ -57,7 +57,7 @@ public class User implements UserDetails {
     @JoinTable(name = "tb_instructor_course",
             joinColumns = @JoinColumn(name = "instructor_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id"))
-    private List<Course> instructor_courses;
+    private Set<Course> instructor_courses;
 
     @OneToMany(mappedBy = "student")
     @JsonIgnoreProperties("student")
