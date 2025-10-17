@@ -132,22 +132,6 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(mapper.mapTo(
                         userService.updatePasswordByEmail(dto.getEmail(),
-                        dto.getCode()), UserResponseDTO.class));
+                        dto.getPassword()), UserResponseDTO.class));
     }
-
-    @PostMapping("teste")
-    public ResponseEntity<Void> teste(){
-        String rawPassword = "asdasd2";
-        String hashedPassword = "$2a$10$P9v0JFoS7fA45KI/ULG9HuP6g2M2KGm20aBVNw.zT6/G0qsInWqF6";// resultado do create
-        String hashedPassword2 = "$2a$10$qJyIi4IKEIe4NbpyPhSTxO33EO2TemgmjnSFnqlcG6jmKK5axLKTO";// resultado do update passworld
-
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-        boolean matches = encoder.matches(rawPassword, hashedPassword);
-        boolean matches2 = encoder.matches(rawPassword, hashedPassword2);
-        System.out.println("Senha confere? " + matches);// true
-        System.out.println("Senha confere 2? " + matches2);// false
-        return ResponseEntity.ok().build();
-    }
-
 }

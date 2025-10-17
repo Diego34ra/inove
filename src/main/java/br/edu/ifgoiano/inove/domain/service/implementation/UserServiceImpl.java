@@ -294,11 +294,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     public User updatePasswordByEmail(String email, String password) {
         User user = findUserByEmail(email);
-        System.out.println("User id: " + user.getId());
-        System.out.println("User email: " + user.getEmail());
 
-        String encryptedPasswrod = new BCryptPasswordEncoder().encode(password);
-        user.setPassword(encryptedPasswrod);
+        String encryptedPassword = new BCryptPasswordEncoder().encode(password);
+        user.setPassword(encryptedPassword);
 
         return userRepository.save(user);
     }
