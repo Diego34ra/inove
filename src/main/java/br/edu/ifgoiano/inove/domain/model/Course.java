@@ -42,11 +42,8 @@ public class Course {
             inverseJoinColumns = @JoinColumn(name = "student_id"))
     private List<User> student;
 
-    @ManyToMany
-    @JoinTable(name = "tb_admin_course",
-            joinColumns = @JoinColumn(name = "course_id"),
-            inverseJoinColumns = @JoinColumn(name = "admin_id"))
-    private List<User> admins;
+    @ManyToMany(mappedBy = "admin_courses", fetch = FetchType.LAZY)
+    private Set<User> admins = new HashSet<>();
 
     @ManyToMany(mappedBy = "instructor_courses", fetch = FetchType.LAZY)
     private Set<User> instructors;

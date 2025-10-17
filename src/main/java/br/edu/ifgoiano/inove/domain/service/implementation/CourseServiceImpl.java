@@ -6,7 +6,10 @@ import br.edu.ifgoiano.inove.controller.dto.response.course.CourseResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.course.CourseSimpleResponseDTO;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceNotFoundException;
 import br.edu.ifgoiano.inove.domain.model.Course;
+import br.edu.ifgoiano.inove.domain.model.Section;
+import br.edu.ifgoiano.inove.domain.model.User;
 import br.edu.ifgoiano.inove.domain.repository.CourseRepository;
+import br.edu.ifgoiano.inove.domain.repository.UserRepository;
 import br.edu.ifgoiano.inove.domain.service.CourseService;
 import br.edu.ifgoiano.inove.domain.utils.InoveUtils;
 import org.springframework.beans.BeanUtils;
@@ -15,20 +18,71 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseServiceImpl implements CourseService {
     @Autowired private CourseRepository cursoRepository;
     @Autowired private MyModelMapper mapper;
     @Autowired private InoveUtils inoveUtils;
+    @Autowired private UserRepository userRepository;
 
-    @Override @Transactional
+    @Override
+    @Transactional
     public CourseResponseDTO create(CourseRequestDTO courseDTO) {
-        Course course = mapper.mapTo(courseDTO, Course.class);
+        var course = new Course();
+        course.setName(courseDTO.getName());
+        course.setDescription(courseDTO.getDescription());
         course.setCreationDate(LocalDateTime.now());
-        return mapper.mapTo(cursoRepository.save(course), CourseResponseDTO.class);
+
+        if (courseDTO.getInstructors() != null && !courseDTO.getInstructors().isEmpty()) {
+            var instIds = courseDTO.getInstructors().stream()
+                    .map(User::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            var instructors = new HashSet<User>(userRepository.findAllById(instIds));
+
+            instructors.forEach(u -> u.getInstructor_courses().add(course));
+            course.setInstructors(instructors);
+        } else {
+            course.setInstructors(new HashSet<>());
+        }
+
+        if (courseDTO.getAdmins() != null && !courseDTO.getAdmins().isEmpty()) {
+            var adminIds = courseDTO.getAdmins().stream()
+                    .map(User::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            var admins = new HashSet<User>(userRepository.findAllById(adminIds));
+            admins.forEach(u -> u.getAdmin_courses().add(course));
+            course.setAdmins(admins);
+        } else {
+            course.setAdmins(new HashSet<>());
+        }
+
+        if (courseDTO.getSections() != null && !courseDTO.getSections().isEmpty()) {
+            var sections = courseDTO.getSections().stream().map(sDto -> {
+                var s = new Section();
+                s.setTitle(sDto.getTitle());
+                s.setDescription(sDto.getDescription());
+                s.setCourse(course);
+                return s;
+            }).toList();
+            course.setSections(sections);
+        } else {
+            course.setSections(List.of());
+        }
+
+        var saved = cursoRepository.save(course);
+        return mapper.mapTo(saved, CourseResponseDTO.class);
     }
+
+
 
     @Override @Transactional(readOnly = true)
     public List<CourseSimpleResponseDTO> findAll() {

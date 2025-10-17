@@ -51,7 +51,7 @@ public class User implements UserDetails {
     @JoinTable(name = "tb_admin_course",
             joinColumns = @JoinColumn(name = "admin_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id"))
-    private List<Course> admin_courses;
+    private Set<Course> admin_courses = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "tb_instructor_course",
