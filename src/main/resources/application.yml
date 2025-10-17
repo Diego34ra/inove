@@ -1,48 +1,59 @@
+server:
+  port: ${PORT:8080}
+
 spring:
   application:
     name: inove
-  profiles:
-    active: local   # profile padrão
+
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
-  api:
-    security:
-      token:
-        expiration: 1
-        secret: ${JWT_SECRET:my-secret-key}
-      refresh-token:
-        expiration: 8
+
+  datasource:
+    url: jdbc:postgresql://${PGHOST:${POSTGRES_HOST:localhost}}:${PGPORT:${POSTGRES_PORT:5432}}/${PGDATABASE:${POSTGRES_DB:inove}}?sslmode=prefer
+    username: ${PGUSER:${POSTGRES_USER:postgres}}
+    password: ${PGPASSWORD:${POSTGRES_PASSWORD:postgres}}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: inoveprojetointegrador@gmail.com
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  cloud:
+    aws:
+      credentials:
+        accessKey: ${AWS_ACCESS_KEY:}
+        secretKey: ${AWS_SECRET_KEY:}
+      region:
+        static: us-east-1
+      s3:
+        bucket: inove-bucket-streaming
 
 springdoc:
   swagger-ui:
     tags-sorter: method
     operations-sorter: alpha
 
-
-
-cloud:
-  aws:
-    credentials:
-      accessKey: ${AWS_ACCESS_KEY}
-      secretKey: ${AWS_SECRET_KEY}
-    region:
-      static: us-east-1
-    s3:
-      bucket: inove-bucket-streaming
-
-mail:
-  host: smtp.gmail.com
-  port: 587
-  username: inoveprojetointegrador@gmail.com
-  password: ${MAIL_PASSWORD:jwhg nbfe iiob lwvz }
-  properties:
-    mail:
-      smtp:
-        auth: true
-        starttls:
-          enable: true
+api:
+  security:
+    token:
+      expiration: 1
+      secret: ${JWT_SECRET}
+    refresh-token:
+      expiration: 8
 
 admin:
   email: inoveprojetointegrador@gmail.com

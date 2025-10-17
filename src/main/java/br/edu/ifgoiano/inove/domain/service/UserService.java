@@ -16,6 +16,8 @@ public interface UserService {
 
     User findById(Long id);
 
+    User findUserByEmail(String email);
+
     UserResponseDTO findOneById(Long id);
 
     @Transactional
@@ -52,4 +54,6 @@ public interface UserService {
     void processInstructorRequest(InstructorRequestDTO instructorDTO);
 
     void confirmInstructorRegistration(String email);
+
+    User updatePasswordByEmail(String email, String password);
 }

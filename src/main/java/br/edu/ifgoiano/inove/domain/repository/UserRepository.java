@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User,Long> {
@@ -14,6 +15,9 @@ public interface UserRepository extends JpaRepository<User,Long> {
     List<User> findByRole(String role);
 
     UserDetails findByEmail(String login);
+
+    @Query(nativeQuery = true, value = "SELECT * FROM tb_user WHERE email = :email")
+    Optional<User> findUserByEmail(String email);
 
     boolean existsByEmail(String email);
 

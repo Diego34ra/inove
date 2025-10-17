@@ -33,7 +33,7 @@ public class FileServiceImpl implements FileService{
         this.s3Service = s3Service;
     }
 
-    @Value("${cloud.aws.s3.bucket}")
+    @Value("${spring.cloud.aws.s3.bucket}")
     private String bucketName;
 
     @Autowired

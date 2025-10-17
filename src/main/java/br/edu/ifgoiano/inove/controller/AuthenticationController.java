@@ -1,15 +1,18 @@
 package br.edu.ifgoiano.inove.controller;
 
+import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
 import br.edu.ifgoiano.inove.controller.dto.request.auth.AuthenticationDTO;
+import br.edu.ifgoiano.inove.controller.dto.request.auth.PasswordResetDTO;
+import br.edu.ifgoiano.inove.controller.dto.request.auth.RecoveryCodeDTO;
 import br.edu.ifgoiano.inove.controller.dto.request.user.UserRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.login.LoginResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.request.auth.RefreshTokenDTO;
-import br.edu.ifgoiano.inove.controller.dto.request.user.StudentRequestDTO;
-import br.edu.ifgoiano.inove.controller.dto.response.user.StudentResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserDetailResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserResponseDTO;
 import br.edu.ifgoiano.inove.controller.exceptions.ErrorDetails;
+import br.edu.ifgoiano.inove.controller.exceptions.ResourceBadRequestException;
 import br.edu.ifgoiano.inove.domain.model.User;
+import br.edu.ifgoiano.inove.domain.service.PasswordRecoveryService;
 import br.edu.ifgoiano.inove.domain.service.SchoolService;
 import br.edu.ifgoiano.inove.domain.service.UserService;
 import br.edu.ifgoiano.inove.security.TokenService;
@@ -20,15 +23,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/inove/auth")
@@ -37,6 +40,7 @@ public class AuthenticationController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
     @Autowired
     private TokenService tokenService;
 
@@ -44,7 +48,10 @@ public class AuthenticationController {
     private UserService userService;
 
     @Autowired
-    private SchoolService  schoolService;
+    private MyModelMapper mapper;
+
+    @Autowired
+    private PasswordRecoveryService passwordRecoveryService;
 
     @PostMapping("login")
     @Operation(summary = "Realizar autenticação")
@@ -53,9 +60,13 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "400", description = "Erro ao autenticar usuário.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
     public ResponseEntity<LoginResponseDTO> login(@RequestBody AuthenticationDTO authenticationDTO){
+        System.out.println("Login autenticado");
         var userNamePassword = new UsernamePasswordAuthenticationToken(authenticationDTO.email(),authenticationDTO.password());
+        System.out.println("Login autenticado 2");
         var auth = authenticationManager.authenticate(userNamePassword);
+        System.out.println("Login autenticado 3");
         var loginResponse = tokenService.getAuthentication((User) auth.getPrincipal());
+        System.out.println("Login autenticado 4");
         return ResponseEntity.ok().body(loginResponse);
     }
 
@@ -80,4 +91,47 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(user));
     }
 
+    @PostMapping("forgot-password/{email}")
+    @Operation(summary = "Envia email com codigo de verificação")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Se usuário relacionado ao email existe recebera um email com código de verificação"),
+    })
+    public ResponseEntity<Void> requestRecoveryCode(@PathVariable("email")
+                                                        @NotBlank(message = "O e-mail é obrigatório.")
+                                                        @Email(message = "O e-mail deve ser válido.")
+                                                        String email){
+        passwordRecoveryService.requestRecoveryCode(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("verify-code")
+    @Operation(summary = "Valida código de verificação")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário criado com sucesso."),
+            @ApiResponse(responseCode = "400", description = "Código inválido ou expirado."),
+    })
+    public ResponseEntity<Void> verifyRecoveryCode(@Valid @RequestBody RecoveryCodeDTO dto) {
+        boolean valid = passwordRecoveryService.validateCode(dto.getEmail(), dto.getCode());
+        if (!valid) {
+            throw new ResourceBadRequestException("Código inválido ou expirado.");
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("reset-password")
+    @Operation(summary = "Altera a senha com código de verificação valido")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso."),
+    })
+    public ResponseEntity<UserResponseDTO> resetPassword(@Valid @RequestBody PasswordResetDTO dto){
+        boolean valid = passwordRecoveryService.consumeCode(dto.getEmail(), dto.getCode());
+        if (!valid) {
+            throw new ResourceBadRequestException("Código inválido ou expirado.");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(mapper.mapTo(
+                        userService.updatePasswordByEmail(dto.getEmail(),
+                        dto.getPassword()), UserResponseDTO.class));
+    }
 }

@@ -17,20 +17,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
 
 @Service
 public class TokenService {
 
-    @Value("${spring.api.security.token.secret}")
+    @Value("${api.security.token.secret}")
     private String secret;
 
-    @Value("${spring.api.security.token.expiration}")
+    @Value("${api.security.token.expiration}")
     private Integer hourExpirationToken;
 
-    @Value("${spring.api.security.refresh-token.expiration}")
+    @Value("${api.security.refresh-token.expiration}")
     private Integer hourExpirationRefreshToken;
 
     @Autowired
@@ -73,17 +72,13 @@ public class TokenService {
     public String validateToken(String token){
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.require(algorithm)
-                    .withIssuer("auth-api")
-                    .build()
-                    .verify(token)
-                    .getSubject();
-        } catch (JWTVerificationException exception){
-            return "";
+            return JWT.require(algorithm).withIssuer("auth-api").build().verify(token).getSubject();
+        } catch (JWTVerificationException e){
+            return null;
         }
     }
 
     private Instant genExpirationDate(Integer hour){
-        return LocalDateTime.now().plusHours(hour).toInstant(ZoneOffset.of("-03:00"));
+        return Instant.now().plus(hour, ChronoUnit.HOURS);
     }
 }

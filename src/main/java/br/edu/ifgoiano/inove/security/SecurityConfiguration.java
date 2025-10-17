@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,6 +18,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -30,12 +36,13 @@ public class SecurityConfiguration {
     };
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
-                .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .cors(Customizer.withDefaults()) // <— usa o bean abaixo
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // <— preflight
 
                         // SWAGGER
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
@@ -62,26 +69,26 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/**").permitAll()
 
                         // UPLOAD DE IMAGEM DE CURSOS
-                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/upload-imagem-curso").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/preview-imagem").permitAll()
+                        //  .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/upload-imagem-curso").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/preview-imagem").permitAll()
 
                         // SEÇÕES
-                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
-                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
+                        // .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/**").hasRole("INSTRUCTOR")
 
                         // CONTEÚDO
-                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
-                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.GET, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMINISTRATOR")
+                        // .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.POST, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.PUT, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
+                        // .requestMatchers(HttpMethod.DELETE, "/api/inove/cursos/{courseId}/secoes/{sectionId}/conteudos/**").hasRole("INSTRUCTOR")
 
                         // UPLOAD DE CONTEÚDO (PDF/VÍDEO)
 
                         // STREAM DE CONTEÚDO
-                        .requestMatchers(HttpMethod.GET, "/api/inove/cursos/secoes/conteudos/stream/{fileName}").permitAll()
+                        //.requestMatchers(HttpMethod.GET, "/api/inove/cursos/secoes/conteudos/stream/{fileName}").permitAll()
 
                         // FEEDBACKS
                         .requestMatchers(HttpMethod.GET, "/api/inove/feedbacks/**").permitAll()
@@ -91,7 +98,7 @@ public class SecurityConfiguration {
 
                         .anyRequest().permitAll()
                 )
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(accessDeniedException()))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(accessDeniedException()))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -110,4 +117,32 @@ public class SecurityConfiguration {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowCredentials(true);
+
+
+        cfg.setAllowedOriginPatterns(List.of(
+                "http://localhost:4200",
+                "https://inove.blog.br",
+                "https://www.inove.blog.br",
+                "https://*.vercel.app"
+        ));
+
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+        cfg.setAllowedHeaders(List.of(
+                "Authorization","Content-Type","X-Requested-With",
+                "Origin","Accept","Access-Control-Request-Method","Access-Control-Request-Headers"
+        ));
+        cfg.setExposedHeaders(List.of("Content-Disposition"));
+        cfg.setMaxAge(3600L); // cache do preflight
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
+    }
+
+
 }
