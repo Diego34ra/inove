@@ -68,7 +68,34 @@ public class FileServiceImpl implements FileService{
         return "Upload e criação de conteúdo realizados com sucesso!";
     }
 
+    @Override
+    public String updateContentFile(MultipartFile file, Long courseId, Long sectionId, Long contentId, ContentSimpleRequestDTO contentDTO) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("O arquivo não pode ser vazio!");
+        }
 
+        Content existingContent = contentService.findById(sectionId, contentId);
+
+        if (existingContent.getFileName() != null && !existingContent.getFileName().isEmpty()) {
+            s3Service.deleteFile(bucketName, existingContent.getFileName());
+        }
+
+        String keyName = System.currentTimeMillis() + "-" + file.getOriginalFilename();
+        String fileUrl = s3Service.uploadFile(bucketName, keyName, file.getInputStream());
+
+        ContentRequestDTO updatedContentDTO = new ContentRequestDTO(
+                contentDTO.getDescription(),
+                contentDTO.getTitle(),
+                contentDTO.getContentType(),
+                fileUrl,
+                keyName
+        );
+
+        contentService.update(courseId, sectionId, contentId, updatedContentDTO);
+        courseService.saveUpdateDate(courseId);
+
+        return "Conteúdo e arquivo atualizados com sucesso!";
+    }
 
     @Override
     public void delete(Long courseId, Long sectionId, Long contentId) {

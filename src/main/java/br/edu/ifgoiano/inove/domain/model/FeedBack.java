@@ -8,7 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "tb_feedback")
+@Table(name = "tb_feedback", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_tb_feedback_student_course", columnNames = {"student_id", "course_id"})
+})
 @JsonIgnoreProperties({"student", "course"})
 public class FeedBack {
     @Id

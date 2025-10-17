@@ -1,5 +1,4 @@
 package br.edu.ifgoiano.inove.domain.service.implementation;
-
 import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
 import br.edu.ifgoiano.inove.controller.dto.request.course.CourseRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.course.CourseResponseDTO;
@@ -12,7 +11,8 @@ import br.edu.ifgoiano.inove.domain.repository.CourseRepository;
 import br.edu.ifgoiano.inove.domain.repository.UserRepository;
 import br.edu.ifgoiano.inove.domain.service.CourseService;
 import br.edu.ifgoiano.inove.domain.utils.InoveUtils;
-import org.springframework.beans.BeanUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +26,14 @@ import java.util.stream.Collectors;
 
 @Service
 public class CourseServiceImpl implements CourseService {
+
     @Autowired private CourseRepository cursoRepository;
     @Autowired private MyModelMapper mapper;
     @Autowired private InoveUtils inoveUtils;
     @Autowired private UserRepository userRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     @Transactional
@@ -46,7 +50,6 @@ public class CourseServiceImpl implements CourseService {
                     .collect(Collectors.toSet());
 
             var instructors = new HashSet<User>(userRepository.findAllById(instIds));
-
             instructors.forEach(u -> u.getInstructor_courses().add(course));
             course.setInstructors(instructors);
         } else {
@@ -83,8 +86,6 @@ public class CourseServiceImpl implements CourseService {
         return mapper.mapTo(saved, CourseResponseDTO.class);
     }
 
-
-
     @Override @Transactional(readOnly = true)
     public List<CourseSimpleResponseDTO> findAll() {
         var courses = cursoRepository.findAllWithInstructors();
@@ -107,7 +108,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public CourseResponseDTO update(Long courseId, CourseRequestDTO dto) {
-
         Course saved = cursoRepository.findByIdWithInstructorsAndAdmins(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum curso com esse id."));
 
@@ -162,10 +162,47 @@ public class CourseServiceImpl implements CourseService {
         return mapper.mapTo(persisted, CourseResponseDTO.class);
     }
 
+    @Override
+    @Transactional
+    public void delete(Long courseId) {
+        Course course = cursoRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum curso com esse id."));
 
-    @Override @Transactional
-    public void delete(Long courseId) { cursoRepository.deleteById(courseId); }
+        entityManager.createNativeQuery("DELETE FROM tb_feedback WHERE course_id = ?1")
+                .setParameter(1, courseId)
+                .executeUpdate();
 
+        entityManager.createNativeQuery(
+                "DELETE FROM tb_content WHERE section_id IN (SELECT id FROM tb_section WHERE course_id = ?1)")
+                .setParameter(1, courseId)
+                .executeUpdate();
+
+        entityManager.createNativeQuery("DELETE FROM tb_student_course WHERE course_id = ?1")
+                .setParameter(1, courseId)
+                .executeUpdate();
+
+        entityManager.createNativeQuery("DELETE FROM tb_instructor_course WHERE course_id = ?1")
+                .setParameter(1, courseId)
+                .executeUpdate();
+
+        entityManager.createNativeQuery("DELETE FROM tb_admin_course WHERE course_id = ?1")
+                .setParameter(1, courseId)
+                .executeUpdate();
+
+        entityManager.createNativeQuery("DELETE FROM tb_user_completed_content WHERE course_id = ?1")
+                .setParameter(1, courseId)
+                .executeUpdate();
+
+        entityManager.createNativeQuery("DELETE FROM tb_section WHERE course_id = ?1")
+                .setParameter(1, courseId)
+                .executeUpdate();
+
+        entityManager.flush();
+
+        cursoRepository.deleteById(courseId);
+    }
+
+    // ===== demais métodos =====
     @Override @Transactional
     public Course saveUpdateDate(Long courseId) {
         Course course = findById(courseId);
