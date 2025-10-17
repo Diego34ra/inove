@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -103,14 +104,64 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum curso com esse id."));
     }
 
-    @Override @Transactional
-    public CourseResponseDTO update(Long courseId, CourseRequestDTO courseDTO) {
-        Course courseModel = mapper.mapTo(courseDTO, Course.class);
-        Course savedCourse = findById(courseId);
-        BeanUtils.copyProperties(courseModel, savedCourse, inoveUtils.getNullPropertyNames(courseModel));
-        savedCourse.setLastUpdateDate(LocalDateTime.now());
-        return mapper.mapTo(cursoRepository.save(savedCourse), CourseResponseDTO.class);
+    @Override
+    @Transactional
+    public CourseResponseDTO update(Long courseId, CourseRequestDTO dto) {
+
+        Course saved = cursoRepository.findByIdWithInstructorsAndAdmins(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum curso com esse id."));
+
+        if (dto.getName() != null)        saved.setName(dto.getName());
+        if (dto.getDescription() != null) saved.setDescription(dto.getDescription());
+        saved.setLastUpdateDate(LocalDateTime.now());
+
+        if (dto.getInstructors() != null) {
+            Set<Long> newIds = dto.getInstructors().stream()
+                    .map(User::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            Set<User> newSet = new HashSet<>(userRepository.findAllById(newIds));
+
+            Set<User> toRemove = new HashSet<>(saved.getInstructors());
+            toRemove.removeAll(newSet);
+            toRemove.forEach(u -> u.getInstructor_courses().remove(saved));
+
+            Set<User> toAdd = new HashSet<>(newSet);
+            toAdd.removeAll(saved.getInstructors());
+            toAdd.forEach(u -> u.getInstructor_courses().add(saved));
+
+            saved.setInstructors(newSet);
+        }
+
+        if (dto.getAdmins() != null) {
+            Set<Long> newIds = dto.getAdmins().stream()
+                    .map(User::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            Set<User> newSet = new HashSet<>(userRepository.findAllById(newIds));
+
+            Set<User> toRemove = new HashSet<>(saved.getAdmins());
+            toRemove.removeAll(newSet);
+            toRemove.forEach(u -> u.getAdmin_courses().remove(saved));
+
+            Set<User> toAdd = new HashSet<>(newSet);
+            toAdd.removeAll(saved.getAdmins());
+            toAdd.forEach(u -> u.getAdmin_courses().add(saved));
+
+            saved.setAdmins(newSet);
+        }
+
+        if (dto.getSections() != null) {
+            dto.getSections().forEach(s -> s.setCourse(saved));
+            saved.setSections(dto.getSections());
+        }
+
+        Course persisted = cursoRepository.save(saved);
+        return mapper.mapTo(persisted, CourseResponseDTO.class);
     }
+
 
     @Override @Transactional
     public void delete(Long courseId) { cursoRepository.deleteById(courseId); }
