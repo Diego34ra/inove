@@ -236,7 +236,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         String emailBody = String.format(
                 "Nome: %s\nCPF: %s\nE-mail: %s\nMotivação: %s\n\n" +
-                        "Clique no link para confirmar o cadastro: http://localhost:8080/api/inove/usuarios/instrutor/confirmar?email=%s",
+                        "Clique no link para confirmar o cadastro: https://inove.blog.br/api/inove/usuarios/instrutor/confirmar?email=%s",
                 instructorDTO.getName(), instructorDTO.getCpf(), instructorDTO.getEmail(), instructorDTO.getMotivation(),
                 instructorDTO.getEmail()
         );
