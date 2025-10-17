@@ -12,7 +12,7 @@ import br.edu.ifgoiano.inove.domain.service.ContentService;
 import br.edu.ifgoiano.inove.domain.service.CourseService;
 import br.edu.ifgoiano.inove.domain.service.SectionService;
 import br.edu.ifgoiano.inove.domain.utils.InoveUtils;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -38,11 +38,13 @@ public class ContentServiceImpl implements ContentService {
     private InoveUtils inoveUtils;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ContentSimpleOutputDTO> list(Long sectionId) {
         return mapper.toList(contentRepository.findBySectionId(sectionId), ContentSimpleOutputDTO.class);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ContentOutputDTO findOneById(Long sectionId, Long contentId) {
         var content = contentRepository.findByIdAndSectionId(contentId, sectionId)
                 .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhum conteudo com esse id."));
@@ -50,6 +52,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Content findById(Long sectionId, Long contentId) {
         return contentRepository.findByIdAndSectionId(contentId, sectionId)
                 .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhum conteudo com esse id."));
@@ -77,12 +80,12 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     @Transactional
-    public void deleteById(Long courseId, Long sectionId) {
-        try{
-            Content section = findById(courseId, sectionId);
-            contentRepository.delete(section);
-        } catch (DataIntegrityViolationException ex){
-            throw new ResourceInUseException("O usuário de ID %d esta em uso e não pode ser removido.");
+    public void deleteById(Long sectionId, Long contentId) {
+        try {
+            Content content = findById(sectionId, contentId);
+            contentRepository.deleteByIdAndSectionId(contentId, sectionId);
+        } catch (DataIntegrityViolationException ex) {
+            throw new ResourceInUseException("O conteúdo de ID %d está em uso e não pode ser removido.");
         }
     }
 }

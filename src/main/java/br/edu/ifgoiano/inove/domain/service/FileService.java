@@ -12,6 +12,12 @@ public interface FileService {
                   Long sectionId,
                   ContentSimpleRequestDTO contentDTO) throws IOException;
 
+    String updateContentFile(MultipartFile file,
+                            Long courseId,
+                            Long sectionId,
+                            Long contentId,
+                            ContentSimpleRequestDTO contentDTO) throws IOException;
+
     void delete(Long courseId, Long sectionId, Long contentId);
 
     String uploadCourseImage(MultipartFile file, Long courseId) throws IOException;

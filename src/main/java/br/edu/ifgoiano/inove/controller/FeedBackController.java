@@ -1,5 +1,7 @@
 package br.edu.ifgoiano.inove.controller;
 
+import br.edu.ifgoiano.inove.controller.dto.request.course.FeedBackOutputDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.user.StudentSimpleResponseDTO;
 import br.edu.ifgoiano.inove.domain.model.FeedBack;
 import br.edu.ifgoiano.inove.domain.service.FeedBackService;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/inove/feedbacks")
@@ -19,19 +22,21 @@ public class FeedBackController {
     }
 
     @PostMapping
-    public ResponseEntity<FeedBack> createFeedback(
+    public ResponseEntity<FeedBackOutputDTO> createFeedback(
             @RequestParam Long userId,
             @RequestParam Long courseId,
             @RequestBody String comment) {
-        return ResponseEntity.ok(feedBackService.createFeedback(userId, courseId, comment));
+        FeedBack feedback = feedBackService.createFeedback(userId, courseId, comment);
+        return ResponseEntity.ok(toOutputDTO(feedback));
     }
 
     @PutMapping("/{feedbackId}")
-    public ResponseEntity<FeedBack> updateFeedback(
+    public ResponseEntity<FeedBackOutputDTO> updateFeedback(
             @PathVariable Long feedbackId,
             @RequestParam Long userId,
             @RequestBody String newComment) {
-        return ResponseEntity.ok(feedBackService.updateFeedback(feedbackId, userId, newComment));
+        FeedBack feedback = feedBackService.updateFeedback(feedbackId, userId, newComment);
+        return ResponseEntity.ok(toOutputDTO(feedback));
     }
 
     @DeleteMapping("/{feedbackId}")
@@ -43,14 +48,36 @@ public class FeedBackController {
     }
 
     @GetMapping("/course/{courseId}")
-    public ResponseEntity<List<FeedBack>> getFeedbacksByCourse(@PathVariable Long courseId) {
-        return ResponseEntity.ok(feedBackService.getFeedbacksByCourse(courseId));
+    public ResponseEntity<List<FeedBackOutputDTO>> getFeedbacksByCourse(@PathVariable Long courseId) {
+        List<FeedBack> feedbacks = feedBackService.getFeedbacksByCourse(courseId);
+        List<FeedBackOutputDTO> feedbackDTOs = feedbacks.stream()
+                .map(this::toOutputDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(feedbackDTOs);
     }
 
     @GetMapping("/user")
-    public ResponseEntity<Optional<FeedBack>> getUserFeedbackForCourse(
+    public ResponseEntity<FeedBackOutputDTO> getUserFeedbackForCourse(
             @RequestParam Long userId,
             @RequestParam Long courseId) {
-        return ResponseEntity.ok(feedBackService.getUserFeedbackForCourse(userId, courseId));
+        Optional<FeedBack> feedback = feedBackService.getUserFeedbackForCourse(userId, courseId);
+        return feedback.map(fb -> ResponseEntity.ok(toOutputDTO(fb)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    private FeedBackOutputDTO toOutputDTO(FeedBack feedback) {
+        FeedBackOutputDTO dto = new FeedBackOutputDTO();
+        dto.setId(feedback.getId());
+        dto.setComment(feedback.getComment());
+
+        if (feedback.getStudent() != null) {
+            StudentSimpleResponseDTO studentDTO = new StudentSimpleResponseDTO();
+            studentDTO.setId(feedback.getStudent().getId());
+            studentDTO.setName(feedback.getStudent().getName());
+            studentDTO.setEmail(feedback.getStudent().getEmail());
+            studentDTO.setSchool(null);
+            dto.setStudent(studentDTO);
+        }
+
+        return dto;
     }
 }
