@@ -242,7 +242,6 @@ public class UserServiceImplTest {
         user.setBirthDate(new Date());
         user.setStudent_courses(new ArrayList<>());
         user.setAdmin_courses(new ArrayList<>());
-        user.setInstructor_courses(new ArrayList<>());
         return user;
     }
 }
