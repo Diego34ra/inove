@@ -19,85 +19,68 @@ import java.util.List;
 
 @Service
 public class CourseServiceImpl implements CourseService {
+    @Autowired private CourseRepository cursoRepository;
+    @Autowired private MyModelMapper mapper;
+    @Autowired private InoveUtils inoveUtils;
 
-    @Autowired
-    private CourseRepository cursoRepository;
-    @Autowired
-    private MyModelMapper mapper;
-    @Autowired
-    private InoveUtils inoveUtils;
-
-    @Override
+    @Override @Transactional
     public CourseResponseDTO create(CourseRequestDTO courseDTO) {
         Course course = mapper.mapTo(courseDTO, Course.class);
         course.setCreationDate(LocalDateTime.now());
         return mapper.mapTo(cursoRepository.save(course), CourseResponseDTO.class);
     }
 
-    @Override
-    @Transactional(readOnly = true)
+    @Override @Transactional(readOnly = true)
     public List<CourseSimpleResponseDTO> findAll() {
         var courses = cursoRepository.findAllWithInstructors();
         return mapper.toList(courses, CourseSimpleResponseDTO.class);
     }
 
-    @Override
-    @Transactional(readOnly = true)
+    @Override @Transactional(readOnly = true)
     public CourseResponseDTO findOneById(Long courseId) {
         var course = cursoRepository.findByIdWithInstructors(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum curso com esse id."));
-
-        if (course.getStudent() != null) {
-            course.getStudent().size();
-        }
-
         return mapper.mapTo(course, CourseResponseDTO.class);
     }
 
-    @Override
-    @Transactional(readOnly = true)
+    @Override @Transactional(readOnly = true)
     public Course findById(Long courseId) {
         return cursoRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum curso com esse id."));
     }
 
-    @Override
+    @Override @Transactional
     public CourseResponseDTO update(Long courseId, CourseRequestDTO courseDTO) {
         Course courseModel = mapper.mapTo(courseDTO, Course.class);
         Course savedCourse = findById(courseId);
-        savedCourse.setLastUpdateDate(LocalDateTime.now());
         BeanUtils.copyProperties(courseModel, savedCourse, inoveUtils.getNullPropertyNames(courseModel));
+        savedCourse.setLastUpdateDate(LocalDateTime.now());
         return mapper.mapTo(cursoRepository.save(savedCourse), CourseResponseDTO.class);
     }
 
-    @Override
-    public void delete(Long courseId) {
-        cursoRepository.deleteById(courseId);
-    }
+    @Override @Transactional
+    public void delete(Long courseId) { cursoRepository.deleteById(courseId); }
 
-    @Override
+    @Override @Transactional
     public Course saveUpdateDate(Long courseId) {
         Course course = findById(courseId);
         course.setLastUpdateDate(LocalDateTime.now());
         return cursoRepository.save(course);
     }
 
-    @Override
+    @Override @Transactional
     public void updateCourseImage(Long courseId, String imageUrl) {
         Course course = findById(courseId);
         course.setImageUrl(imageUrl);
         cursoRepository.save(course);
     }
 
-    @Override
-    @Transactional(readOnly = true)
+    @Override @Transactional(readOnly = true)
     public String getCourseImageUrl(Long courseId) {
-        Course course = findById(courseId);
-        return course.getImageUrl();
+        return findById(courseId).getImageUrl();
     }
 
-    @Override
-    @Transactional(readOnly = true)
+    @Override @Transactional(readOnly = true)
     public List<CourseSimpleResponseDTO> findCoursesByInstructor(Long instructorId) {
         var courses = cursoRepository.findByInstructorIdWithInstructors(instructorId);
         return mapper.toList(courses, CourseSimpleResponseDTO.class);
