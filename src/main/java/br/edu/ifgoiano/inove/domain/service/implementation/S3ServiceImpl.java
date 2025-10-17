@@ -43,7 +43,7 @@ public class S3ServiceImpl implements FileService {
     @Autowired
     private ContentRepository contentRepository;
 
-    @Value("${cloud.aws.s3.bucket}")
+    @Value("${spring.cloud.aws.s3.bucket}")
     private String bucketName;
 
     @Override
