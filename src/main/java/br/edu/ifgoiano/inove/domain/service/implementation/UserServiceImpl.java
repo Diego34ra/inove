@@ -69,6 +69,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhum usuario com esse id."));
     }
 
+
+    @Override
+    public User findUserByEmail(String email) {
+        return userRepository.findUserByEmail(email)
+                .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhum usuario com esse id."));
+    }
+
     @Override
     public UserResponseDTO findOneById(Long id) {
         var user = userRepository.findById(id)
@@ -281,5 +288,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 "Cadastro Aprovado - Bem-vindo à Plataforma!",
                 instructorEmailBody
         );
+    }
+
+    @Override
+    @Transactional
+    public User updatePasswordByEmail(String email, String password) {
+        User user = findUserByEmail(email);
+        System.out.println("User id: " + user.getId());
+        System.out.println("User email: " + user.getEmail());
+
+        String encryptedPasswrod = new BCryptPasswordEncoder().encode(password);
+        user.setPassword(encryptedPasswrod);
+
+        return userRepository.save(user);
     }
 }
