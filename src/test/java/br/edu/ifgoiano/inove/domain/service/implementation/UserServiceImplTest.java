@@ -23,10 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -241,7 +238,8 @@ public class UserServiceImplTest {
         user.setRole(role);
         user.setBirthDate(new Date());
         user.setStudent_courses(new ArrayList<>());
-        user.setAdmin_courses(new ArrayList<>());
+        user.setAdmin_courses(new HashSet<>());
+        user.setInstructor_courses(new HashSet<>());
         return user;
     }
 }
