@@ -14,10 +14,12 @@ import br.edu.ifgoiano.inove.domain.model.User;
 import br.edu.ifgoiano.inove.domain.model.UserRole;
 import br.edu.ifgoiano.inove.domain.repository.UserRepository;
 import br.edu.ifgoiano.inove.domain.service.CourseService;
+import br.edu.ifgoiano.inove.domain.service.EmailService;
 import br.edu.ifgoiano.inove.domain.service.SchoolService;
 import br.edu.ifgoiano.inove.domain.service.UserService;
 import br.edu.ifgoiano.inove.domain.utils.InoveUtils;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,24 +36,19 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService, UserDetailsService {
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private SchoolService schoolService;
 
-    @Autowired
     private MyModelMapper mapper;
 
-    @Autowired
     private InoveUtils inoveUtils;
 
-    @Autowired
     private CourseService courseService;
 
-    @Autowired
-    private EmailServiceImpl emailServiceImpl;
+    private final EmailService emailService;
 
     @Value("${admin.email}")
     private String adminEmail;
@@ -237,11 +234,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         String emailBody = String.format(
                 "Nome: %s\nCPF: %s\nE-mail: %s\nMotivação: %s\n\n" +
                         "Clique no link para confirmar o cadastro: https://inove.blog.br/api/inove/usuarios/instrutor/confirmar?email=%s",
-                instructorDTO.getName(), instructorDTO.getCpf(), instructorDTO.getEmail(), instructorDTO.getMotivation(),
-                instructorDTO.getEmail()
+                instructorDTO.getName(), instructorDTO.getCpf(), instructorDTO.getEmail(),
+                instructorDTO.getMotivation(), instructorDTO.getEmail()
         );
 
-        emailServiceImpl.sendConfirmationEmail(adminEmail, "Novo Cadastro de Instrutor", emailBody);
+        emailService.send(adminEmail, "Novo Cadastro de Instrutor", emailBody);
     }
 
     @Override
@@ -263,13 +260,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         newInstructor.setRole(UserRole.INSTRUCTOR);
 
         userRepository.save(newInstructor);
-
         pendingInstructors.remove(email);
 
-        emailServiceImpl.sendConfirmationEmail(
+        emailService.send(
                 adminEmail,
                 "Cadastro de Instrutor Confirmado",
-                String.format("O cadastro do instrutor %s (%s) foi confirmado com sucesso.", instructorDTO.getName(), instructorDTO.getEmail())
+                String.format(
+                        "O cadastro do instrutor %s (%s) foi confirmado com sucesso.",
+                        instructorDTO.getName(), instructorDTO.getEmail()
+                )
         );
 
         String instructorEmailBody = String.format(
@@ -283,7 +282,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 instructorDTO.getName(), instructorDTO.getEmail(), temporaryPassword
         );
 
-        emailServiceImpl.sendConfirmationEmail(
+        emailService.send(
                 instructorDTO.getEmail(),
                 "Cadastro Aprovado - Bem-vindo à Plataforma!",
                 instructorEmailBody

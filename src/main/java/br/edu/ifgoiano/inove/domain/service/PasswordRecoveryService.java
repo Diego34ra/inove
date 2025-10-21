@@ -3,7 +3,6 @@ package br.edu.ifgoiano.inove.domain.service;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceBadRequestException;
 import br.edu.ifgoiano.inove.domain.model.User;
 import br.edu.ifgoiano.inove.domain.repository.UserRepository;
-import br.edu.ifgoiano.inove.domain.service.implementation.EmailServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PasswordRecoveryService {
 
     private final UserRepository userRepository;
-    private final EmailServiceImpl emailServiceImpl;
+    private final EmailService emailService;
 
     private static final Duration CODE_TTL = Duration.ofMinutes(10);
     private static final int MAX_ATTEMPTS = 5;
@@ -49,7 +48,7 @@ public class PasswordRecoveryService {
                 Se você não solicitou, pode ignorar este e-mail.
                 """.formatted(code, CODE_TTL.toMinutes());
 
-        emailServiceImpl.sendConfirmationEmail(email, EMAIL_SUBJECT, emailBody);
+        emailService.send(email, EMAIL_SUBJECT, emailBody);
     }
 
     public boolean validateCode(String email, String code) {
