@@ -38,16 +38,11 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService, UserDetailsService {
-    private UserRepository userRepository;
-
-    private SchoolService schoolService;
-
-    private MyModelMapper mapper;
-
-    private InoveUtils inoveUtils;
-
-    private CourseService courseService;
-
+    private final UserRepository userRepository;
+    private final SchoolService schoolService;
+    private final MyModelMapper mapper;
+    private final InoveUtils inoveUtils;
+    private final CourseService courseService;
     private final EmailService emailService;
 
     @Value("${admin.email}")
