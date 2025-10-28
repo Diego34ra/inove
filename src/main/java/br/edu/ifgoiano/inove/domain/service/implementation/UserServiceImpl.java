@@ -257,7 +257,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         userRepository.save(newInstructor);
         pendingInstructors.remove(email);
 
-        emailService.send(
+        emailService.sendHtml(
                 adminEmail,
                 "Cadastro de Instrutor Confirmado",
                 String.format(
@@ -277,7 +277,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 instructorDTO.getName(), instructorDTO.getEmail(), temporaryPassword
         );
 
-        emailService.send(
+        emailService.sendHtml(
                 instructorDTO.getEmail(),
                 "Cadastro Aprovado - Bem-vindo à Plataforma!",
                 instructorEmailBody
