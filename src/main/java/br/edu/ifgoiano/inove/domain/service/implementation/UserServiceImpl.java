@@ -9,9 +9,8 @@ import br.edu.ifgoiano.inove.controller.dto.response.user.UserSimpleResponseDTO;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceBadRequestException;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceInUseException;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceNotFoundException;
-import br.edu.ifgoiano.inove.domain.model.Course;
-import br.edu.ifgoiano.inove.domain.model.User;
-import br.edu.ifgoiano.inove.domain.model.UserRole;
+import br.edu.ifgoiano.inove.domain.model.*;
+import br.edu.ifgoiano.inove.domain.repository.InstructorRequestRepository;
 import br.edu.ifgoiano.inove.domain.repository.UserRepository;
 import br.edu.ifgoiano.inove.domain.service.CourseService;
 import br.edu.ifgoiano.inove.domain.service.EmailService;
@@ -29,11 +28,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -44,9 +48,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final InoveUtils inoveUtils;
     private final CourseService courseService;
     private final EmailService emailService;
+    private final InstructorRequestRepository requestRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${admin.email}")
     private String adminEmail;
+
+    private final String approveBaseUrl = "https://inove.blog.br/api/inove/usuarios/instrutor/confirmar?token=";
 
     private final Map<String, InstructorRequestDTO> pendingInstructors = new HashMap<>();
 
@@ -209,7 +217,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     public void removeCourseFromUser(Long userId, Long courseId) {
         User user = findById(userId);
-        boolean removed = user.getStudent_courses().removeIf(course -> course.getId().equals(courseId)); // Remove o curso
+        boolean removed = user.getStudent_courses().removeIf(course -> course.getId().equals(courseId));
 
         if (!removed) {
             throw new ResourceNotFoundException("Curso não encontrado na lista do usuário.");
@@ -219,18 +227,28 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void processInstructorRequest(InstructorRequestDTO instructorDTO) {
-        if (userRepository.existsByEmail(instructorDTO.getEmail())) {
+    public void processInstructorRequest(InstructorRequestDTO dto) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
             throw new ResourceBadRequestException("E-mail já cadastrado.");
         }
 
-        pendingInstructors.put(instructorDTO.getEmail(), instructorDTO);
+        String token = UUID.randomUUID().toString();
+        Instant expiresAt = Instant.now().plus(2, ChronoUnit.DAYS);
 
+        InstructorRequest req = new InstructorRequest();
+        req.setName(dto.getName());
+        req.setCpf(dto.getCpf());
+        req.setEmail(dto.getEmail());
+        req.setMotivation(dto.getMotivation());
+        req.setToken(token);
+        req.setExpiresAt(expiresAt);
+        req.setStatus(RequestStatus.PENDING);
+        requestRepository.save(req);
+
+        String approveLink = approveBaseUrl + token;
         String emailBody = String.format(
-                "Nome: %s\nCPF: %s\nE-mail: %s\nMotivação: %s\n\n" +
-                        "Clique no link para confirmar o cadastro: https://inove.blog.br/api/inove/usuarios/instrutor/confirmar?email=%s",
-                instructorDTO.getName(), instructorDTO.getCpf(), instructorDTO.getEmail(),
-                instructorDTO.getMotivation(), instructorDTO.getEmail()
+                "Nome: %s%nCPF: %s%nE-mail: %s%nMotivação: %s%n%nClique para APROVAR: %s",
+                dto.getName(), dto.getCpf(), dto.getEmail(), dto.getMotivation(), approveLink
         );
 
         emailService.send(adminEmail, "Novo Cadastro de Instrutor", emailBody);
@@ -238,47 +256,60 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public void confirmInstructorRegistration(String email) {
-        InstructorRequestDTO instructorDTO = pendingInstructors.get(email);
-        if (instructorDTO == null) {
-            throw new ResourceNotFoundException("Solicitação de cadastro não encontrada.");
+    public void confirmInstructorRegistrationByToken(String token) {
+        InstructorRequest req = requestRepository.findByToken(token)
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitação de cadastro não encontrada."));
+
+        if (req.getStatus() == RequestStatus.APPROVED) return;
+
+        if (req.getExpiresAt().isBefore(Instant.now())) {
+            req.setStatus(RequestStatus.EXPIRED);
+            requestRepository.save(req);
+            throw new ResourceBadRequestException("Token expirado.");
         }
 
-        String temporaryPassword = RandomStringUtils.randomAlphanumeric(8);
-        String encryptedPassword = new BCryptPasswordEncoder().encode(temporaryPassword);
+        if (userRepository.existsByEmail(req.getEmail())) {
+            req.setStatus(RequestStatus.APPROVED);
+            req.setApprovedAt(Instant.now());
+            requestRepository.save(req);
+            return;
+        }
+
+        String temporaryPassword = generateTempPassword();
+        String encryptedPassword = passwordEncoder.encode(temporaryPassword);
 
         User newInstructor = new User();
-        newInstructor.setName(instructorDTO.getName());
-        newInstructor.setCpf(instructorDTO.getCpf());
-        newInstructor.setEmail(instructorDTO.getEmail());
+        newInstructor.setName(req.getName());
+        newInstructor.setCpf(req.getCpf());
+        newInstructor.setEmail(req.getEmail());
         newInstructor.setPassword(encryptedPassword);
         newInstructor.setRole(UserRole.INSTRUCTOR);
-
         userRepository.save(newInstructor);
-        pendingInstructors.remove(email);
+
+        req.setStatus(RequestStatus.APPROVED);
+        req.setApprovedAt(Instant.now());
+        requestRepository.save(req);
 
         emailService.sendHtml(
                 adminEmail,
                 "Cadastro de Instrutor Confirmado",
-                String.format(
-                        "O cadastro do instrutor %s (%s) foi confirmado com sucesso.",
-                        instructorDTO.getName(), instructorDTO.getEmail()
-                )
+                String.format("O cadastro do instrutor %s (%s) foi confirmado com sucesso.",
+                        req.getName(), req.getEmail())
         );
 
         String instructorEmailBody = String.format(
-                "Olá, %s!\n\n" +
-                        "Seu cadastro como instrutor na plataforma foi aprovado!\n\n" +
-                        "Aqui estão seus dados de acesso:\n" +
-                        "E-mail: %s\n" +
-                        "Senha temporária: %s\n\n" +
-                        "Recomendamos que você altere sua senha após o primeiro login.\n\n" +
+                "Olá, %s!%n%n" +
+                        "Seu cadastro como instrutor na plataforma foi aprovado!%n%n" +
+                        "Aqui estão seus dados de acesso:%n" +
+                        "E-mail: %s%n" +
+                        "Senha temporária: %s%n%n" +
+                        "Recomendamos que você altere sua senha após o primeiro login.%n%n" +
                         "Bem-vindo à plataforma!",
-                instructorDTO.getName(), instructorDTO.getEmail(), temporaryPassword
+                req.getName(), req.getEmail(), temporaryPassword
         );
 
         emailService.sendHtml(
-                instructorDTO.getEmail(),
+                req.getEmail(),
                 "Cadastro Aprovado - Bem-vindo à Plataforma!",
                 instructorEmailBody
         );
@@ -293,5 +324,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setPassword(encryptedPassword);
 
         return userRepository.save(user);
+    }
+
+    private String generateTempPassword() {
+        final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom sr = new SecureRandom();
+        StringBuilder sb = new StringBuilder(10);
+        for (int i = 0; i < 10; i++) sb.append(alphabet.charAt(sr.nextInt(alphabet.length())));
+        return sb.toString();
     }
 }

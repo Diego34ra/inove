@@ -53,7 +53,7 @@ public interface UserService {
 
     void processInstructorRequest(InstructorRequestDTO instructorDTO);
 
-    void confirmInstructorRegistration(String email);
+    void confirmInstructorRegistrationByToken(String token);
 
     User updatePasswordByEmail(String email, String password);
 }

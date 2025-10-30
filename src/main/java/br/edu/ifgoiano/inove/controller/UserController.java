@@ -186,8 +186,8 @@ public class UserController {
     }
 
     @GetMapping("/instrutor/confirmar")
-    public ResponseEntity<String> confirmInstructor(@RequestParam String email) {
-        userService.confirmInstructorRegistration(email);
-        return ResponseEntity.status(HttpStatus.OK).body("Cadastro confirmado com sucesso.");
+    public ResponseEntity<String> confirmInstructor(@RequestParam String token) {
+        userService.confirmInstructorRegistrationByToken(token);
+        return ResponseEntity.ok("Cadastro confirmado com sucesso.");
     }
 }
