@@ -1,7 +1,9 @@
 package br.edu.ifgoiano.inove.domain.service.implementation;
 
-import br.edu.ifgoiano.inove.controller.dto.request.user.*;
 import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
+import br.edu.ifgoiano.inove.controller.dto.request.user.InstructorRequestDTO;
+import br.edu.ifgoiano.inove.controller.dto.request.user.StudentRequestDTO;
+import br.edu.ifgoiano.inove.controller.dto.request.user.UserRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.course.CourseSimpleResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.StudentResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserResponseDTO;
@@ -21,14 +23,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -49,7 +49,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final CourseService courseService;
     private final EmailService emailService;
     private final InstructorRequestRepository requestRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Value("${admin.email}")
     private String adminEmail;
@@ -66,32 +65,32 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhum usuario com esse id."));
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi possível encontrar nenhum usuario com esse id."));
     }
 
 
     @Override
     public User findUserByEmail(String email) {
         return userRepository.findUserByEmail(email)
-                .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhum usuario com esse id."));
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi possível encontrar nenhum usuario com esse id."));
     }
 
     @Override
     public UserResponseDTO findOneById(Long id) {
         var user = userRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhum usuario com esse id."));
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi possível encontrar nenhum usuario com esse id."));
         return mapper.mapTo(user, UserResponseDTO.class);
     }
 
     @Override
     @Transactional
     public UserResponseDTO create(UserRequestDTO newUserDTO) {
-        User newUser = mapper.mapTo(newUserDTO,User.class);
+        User newUser = mapper.mapTo(newUserDTO, User.class);
 
         if (emailExists(newUser.getEmail()))
             throw new ResourceBadRequestException("Esse email já está cadastrado!");
 
-        if(cpfExists(newUser.getCpf()))
+        if (cpfExists(newUser.getCpf()))
             throw new ResourceBadRequestException("Esse CPF á está cadastrado!");
 
         String encryptedPasswrod = new BCryptPasswordEncoder().encode(newUser.getPassword());
@@ -104,24 +103,24 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     public StudentResponseDTO create(Long schoolId, StudentRequestDTO newUserDTO) {
 
-       var userCreate = mapper.mapTo(newUserDTO, User.class);
-       userCreate.setSchool(schoolService.findById(schoolId));
+        var userCreate = mapper.mapTo(newUserDTO, User.class);
+        userCreate.setSchool(schoolService.findById(schoolId));
 
-       if (userCreate.getRole() == null)
-           userCreate.setRole(UserRole.STUDENT);
+        if (userCreate.getRole() == null)
+            userCreate.setRole(UserRole.STUDENT);
 
-       if (emailExists(userCreate.getEmail()))
-           throw new ResourceBadRequestException("Esse email já está cadastrado!");
+        if (emailExists(userCreate.getEmail()))
+            throw new ResourceBadRequestException("Esse email já está cadastrado!");
 
-       if(cpfExists(userCreate.getCpf()))
-           throw new ResourceBadRequestException("Esse CPF á está cadastrado!");
+        if (cpfExists(userCreate.getCpf()))
+            throw new ResourceBadRequestException("Esse CPF á está cadastrado!");
 
         String encryptedPasswrod = new BCryptPasswordEncoder().encode(userCreate.getPassword());
-       userCreate.setPassword(encryptedPasswrod);
+        userCreate.setPassword(encryptedPasswrod);
 
-       userCreate.setSchool(userCreate.getSchool());
+        userCreate.setSchool(userCreate.getSchool());
 
-       return mapper.mapTo(userRepository.save(userCreate), StudentResponseDTO.class);
+        return mapper.mapTo(userRepository.save(userCreate), StudentResponseDTO.class);
     }
 
     @Override
@@ -135,10 +134,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public void deleteById(Long id) {
-        try{
+        try {
             User user = findById(id);
             userRepository.delete(user);
-        } catch (DataIntegrityViolationException ex){
+        } catch (DataIntegrityViolationException ex) {
             throw new ResourceInUseException("O usuário de ID %d esta em uso e não pode ser removido.");
         }
     }
@@ -275,8 +274,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return;
         }
 
-        String temporaryPassword = generateTempPassword();
-        String encryptedPassword = passwordEncoder.encode(temporaryPassword);
+        String temporaryPassword = RandomStringUtils.randomAlphanumeric(8);
+        String encryptedPassword = new BCryptPasswordEncoder().encode(temporaryPassword);
 
         User newInstructor = new User();
         newInstructor.setName(req.getName());
