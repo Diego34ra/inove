@@ -47,6 +47,6 @@ admin:
   email: inoveprojetointegrador@gmail.com
 
 resend:
-  apiKey: ${RESEND_API_KEY:re_d44zmcXb_3q9Q3RiqrZhpLeeraxCSLnD9}
-  from: ${RESEND_FROM:Inove <no-reply@inove.blog.br>}
-  replyTo: ${RESEND_REPLY_TO:inoveprojetointegrador@gmail.com}
+  apiKey: ${RESEND_API_KEY}
+  from: ${RESEND_FROM}
+  replyTo: ${RESEND_REPLY_TO}
