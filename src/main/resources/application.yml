@@ -13,7 +13,7 @@ spring:
   datasource:
     url: jdbc:postgresql://${PGHOST:${POSTGRES_HOST:localhost}}:${PGPORT:${POSTGRES_PORT:5432}}/${PGDATABASE:${POSTGRES_DB:inove}}?sslmode=prefer
     username: ${PGUSER:${POSTGRES_USER:postgres}}
-    password: ${PGPASSWORD:${POSTGRES_PASSWORD:1968}}
+    password: ${PGPASSWORD:${POSTGRES_PASSWORD:postgres}}
 
   jpa:
     hibernate:
@@ -23,8 +23,8 @@ spring:
   cloud:
     aws:
       credentials:
-        accessKey: ${AWS_ACCESS_KEY}
-        secretKey: ${AWS_SECRET_KEY}
+        accessKey: ${AWS_ACCESS_KEY:}
+        secretKey: ${AWS_SECRET_KEY:}
       region:
         static: us-east-1
       s3:
@@ -39,7 +39,7 @@ api:
   security:
     token:
       expiration: 1
-      secret: ${JWT_SECRET:adada}
+      secret: ${JWT_SECRET}
     refresh-token:
       expiration: 8
 
