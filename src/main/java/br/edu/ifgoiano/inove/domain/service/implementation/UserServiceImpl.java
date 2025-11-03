@@ -5,6 +5,7 @@ import br.edu.ifgoiano.inove.controller.dto.request.user.InstructorRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.request.user.StudentRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.request.user.UserRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.course.CourseSimpleResponseDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.school.SchoolResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.StudentResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserSimpleResponseDTO;
@@ -325,11 +326,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepository.save(user);
     }
 
-    private String generateTempPassword() {
-        final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        SecureRandom sr = new SecureRandom();
-        StringBuilder sb = new StringBuilder(10);
-        for (int i = 0; i < 10; i++) sb.append(alphabet.charAt(sr.nextInt(alphabet.length())));
-        return sb.toString();
+    @Override
+    public SchoolResponseDTO findSchoolByUserId(Long userId) {
+        User user = findById(userId);
+        if (user.getSchool() == null) {
+            throw new ResourceNotFoundException("Usuário não está associado a nenhuma escola.");
+        }
+        return mapper.mapTo(user.getSchool(), SchoolResponseDTO.class);
     }
 }

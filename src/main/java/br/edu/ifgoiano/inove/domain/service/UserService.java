@@ -2,6 +2,7 @@ package br.edu.ifgoiano.inove.domain.service;
 
 import br.edu.ifgoiano.inove.controller.dto.request.user.*;
 import br.edu.ifgoiano.inove.controller.dto.response.course.CourseSimpleResponseDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.school.SchoolResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.StudentResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserSimpleResponseDTO;
@@ -56,4 +57,6 @@ public interface UserService {
     void confirmInstructorRegistrationByToken(String token);
 
     User updatePasswordByEmail(String email, String password);
+
+    SchoolResponseDTO findSchoolByUserId(Long userId);
 }
