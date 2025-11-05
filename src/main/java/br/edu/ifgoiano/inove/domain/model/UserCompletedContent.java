@@ -28,4 +28,7 @@ public class UserCompletedContent {
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
+
+    public UserCompletedContent() {
+    }
 }

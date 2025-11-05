@@ -74,7 +74,7 @@ public class FileServiceImpl implements FileService{
             throw new IllegalArgumentException("O arquivo não pode ser vazio!");
         }
 
-        Content existingContent = contentService.findById(sectionId, contentId);
+        Content existingContent = contentService.findById(courseId, sectionId, contentId);
 
         if (existingContent.getFileName() != null && !existingContent.getFileName().isEmpty()) {
             s3Service.deleteFile(bucketName, existingContent.getFileName());
@@ -99,11 +99,11 @@ public class FileServiceImpl implements FileService{
 
     @Override
     public void delete(Long courseId, Long sectionId, Long contentId) {
-        Content content = contentService.findById(sectionId, contentId);
+        Content content = contentService.findById(courseId, sectionId, contentId);
 
         s3Service.deleteFile(bucketName, content.getFileName());
 
-        contentService.deleteById(courseId, sectionId);
+        contentService.deleteById(courseId, courseId, sectionId);
 
         System.out.println("Todas as referências do arquivo foram deletadas!");
     }

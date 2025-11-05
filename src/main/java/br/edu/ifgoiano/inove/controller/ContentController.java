@@ -4,10 +4,13 @@ import br.edu.ifgoiano.inove.controller.dto.request.content.ContentRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.request.content.ContentSimpleRequestDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.content.ContentOutputDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.content.ContentSimpleOutputDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.content.completedContent.CompletedContentMinDTO;
 import br.edu.ifgoiano.inove.domain.model.Content;
 import br.edu.ifgoiano.inove.domain.model.ContentType;
+import br.edu.ifgoiano.inove.domain.model.UserCompletedContent;
 import br.edu.ifgoiano.inove.domain.service.ContentService;
 import br.edu.ifgoiano.inove.domain.service.FileService;
+import br.edu.ifgoiano.inove.domain.service.UserCompletedContentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,6 +37,9 @@ public class ContentController {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private UserCompletedContentService completedContentService;
+
     @PostMapping("/upload")
     public ResponseEntity<?> createContentWithFile(
             @PathVariable Long courseId,
@@ -58,8 +64,6 @@ public class ContentController {
         }
     }
 
-
-
     @GetMapping
     @Operation(summary = "Listar conteudos")
     @ApiResponses({
@@ -78,8 +82,10 @@ public class ContentController {
             @ApiResponse(responseCode = "200", description = "Coteudo encontrado com sucesso.",content = { @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = ContentOutputDTO.class))}),
             //@ApiResponse(responseCode = "401", description = "Acesso negado.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
-    public ResponseEntity<?> findOne(@PathVariable Long sectionId, @PathVariable Long contentId){
-        ContentOutputDTO savedContent = contentService.findOneById(sectionId, contentId);
+    public ResponseEntity<?> findOne(@PathVariable Long courseId,
+                                     @PathVariable Long sectionId,
+                                     @PathVariable Long contentId){
+        ContentOutputDTO savedContent = contentService.findOneById(courseId, sectionId, contentId);
 
         return ResponseEntity.status(HttpStatus.OK).body(savedContent);
     }
@@ -150,5 +156,23 @@ public class ContentController {
                                     @PathVariable Long contentId){
             fileService.delete(courseId, sectionId, contentId);
             return ResponseEntity.noContent().build();
+    }
+
+
+    @PostMapping("/{contentId}/discente/{userId}/progresso")
+    @Operation(summary = "Salva Conteúdo como Concluido")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Marcar conteúdo como concluído.",
+                    content = { @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Content.class))}),
+            //@ApiResponse(responseCode = "401", description = "Acesso negado.",
+            // content = { @Content(mediaType = "application/json",
+            // schema = @Schema(implementation = ErrorDetails.class))})
+    })
+    public ResponseEntity<CompletedContentMinDTO> saveUserProgress(@PathVariable("courseId") Long courseId,
+                                                                   @PathVariable("sectionId") Long sectionId,
+                                                                   @PathVariable("contentId") Long contentId,
+                                                                   @PathVariable("userId") Long userId){
+        return ResponseEntity.ok().body(completedContentService.create(courseId, sectionId, contentId, userId));
     }
 }

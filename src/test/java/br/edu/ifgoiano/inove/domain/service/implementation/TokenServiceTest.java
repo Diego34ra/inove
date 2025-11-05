@@ -1,10 +1,11 @@
-package br.edu.ifgoiano.inove.security;
+package br.edu.ifgoiano.inove.domain.service.implementation;
 
 import br.edu.ifgoiano.inove.controller.dto.request.auth.RefreshTokenDTO;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceBadRequestException;
 import br.edu.ifgoiano.inove.domain.model.User;
 import br.edu.ifgoiano.inove.domain.model.UserRole;
 import br.edu.ifgoiano.inove.domain.service.UserService;
+import br.edu.ifgoiano.inove.security.TokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

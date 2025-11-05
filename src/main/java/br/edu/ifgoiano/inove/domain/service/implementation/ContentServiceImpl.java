@@ -45,16 +45,16 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     @Transactional(readOnly = true)
-    public ContentOutputDTO findOneById(Long sectionId, Long contentId) {
-        var content = contentRepository.findByIdAndSectionId(contentId, sectionId)
+    public ContentOutputDTO findOneById(Long courseId, Long sectionId, Long contentId) {
+        var content = contentRepository.findByIdAndSectionIdAndSection_Course_Id(contentId, sectionId, courseId)
                 .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhum conteudo com esse id."));
         return mapper.mapTo(content, ContentOutputDTO.class);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Content findById(Long sectionId, Long contentId) {
-        return contentRepository.findByIdAndSectionId(contentId, sectionId)
+    public Content findById(Long courseId, Long sectionId, Long contentId) {
+        return contentRepository.findByIdAndSectionIdAndSection_Course_Id(contentId, sectionId, courseId)
                 .orElseThrow(()-> new ResourceNotFoundException("Não foi possível encontrar nenhum conteudo com esse id."));
     }
 
@@ -72,7 +72,7 @@ public class ContentServiceImpl implements ContentService {
     @Transactional
     public ContentOutputDTO update(Long courseId, Long sectionId, Long contentId, ContentRequestDTO newContentDTO) {
         Content newContentModel = mapper.mapTo(newContentDTO,Content.class);
-        Content savedContent = findById(sectionId, contentId);
+        Content savedContent = this.findById(courseId, sectionId, contentId);
         courseService.saveUpdateDate(courseId);
         BeanUtils.copyProperties(newContentModel, savedContent, inoveUtils.getNullPropertyNames(newContentModel));
         return mapper.mapTo(contentRepository.save(savedContent), ContentOutputDTO.class);
@@ -80,12 +80,16 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     @Transactional
-    public void deleteById(Long sectionId, Long contentId) {
+    public void deleteById(Long courseId, Long sectionId, Long contentId) {
         try {
-            Content content = findById(sectionId, contentId);
             contentRepository.deleteByIdAndSectionId(contentId, sectionId);
         } catch (DataIntegrityViolationException ex) {
             throw new ResourceInUseException("O conteúdo de ID %d está em uso e não pode ser removido.");
         }
+    }
+
+    @Override
+    public Long getContentAmountByCourseId(Long courseId) {
+        return contentRepository.countBySection_Course_Id(courseId);
     }
 }

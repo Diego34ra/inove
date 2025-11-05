@@ -13,9 +13,11 @@ import java.util.Optional;
 @Repository
 public interface ContentRepository extends JpaRepository<Content,Long> {
     List<Content> findBySectionId(Long sectionId);
-    Optional<Content> findByIdAndSectionId(Long contentId, Long sectionId);
+    Optional<Content> findByIdAndSectionIdAndSection_Course_Id(Long contentId, Long sectionId, Long courseId);
 
     @Modifying
     @Query("DELETE FROM Content c WHERE c.id = :contentId AND c.section.id = :sectionId")
     void deleteByIdAndSectionId(@Param("contentId") Long contentId, @Param("sectionId") Long sectionId);
+
+    Long countBySection_Course_Id(Long courseId);
 }

@@ -1,7 +1,6 @@
 package br.edu.ifgoiano.inove.domain.service.implementation;
 
 import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
-import br.edu.ifgoiano.inove.controller.dto.request.content.ContentSimpleRequestDTO;
 import br.edu.ifgoiano.inove.domain.repository.ContentRepository;
 import br.edu.ifgoiano.inove.domain.service.ContentService;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,18 +10,12 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -167,6 +160,6 @@ class FileServiceImplTest {
                 fileService.delete(courseId, sectionId, contentId));
 
         verify(s3Service, never()).deleteFile(any(), any());
-        verify(contentService, never()).deleteById(any(), any());
+        verify(contentService, never()).deleteById(any(), any(), any());
     }
 }

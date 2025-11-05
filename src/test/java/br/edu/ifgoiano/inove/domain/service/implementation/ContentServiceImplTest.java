@@ -6,7 +6,6 @@ import br.edu.ifgoiano.inove.controller.dto.response.content.ContentOutputDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.content.ContentSimpleOutputDTO;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceNotFoundException;
 import br.edu.ifgoiano.inove.domain.model.Content;
-import br.edu.ifgoiano.inove.domain.model.Course;
 import br.edu.ifgoiano.inove.domain.model.Section;
 import br.edu.ifgoiano.inove.domain.repository.ContentRepository;
 import br.edu.ifgoiano.inove.domain.service.CourseService;
@@ -84,6 +83,7 @@ class ContentServiceImplTest {
 
     @Test
     void findOneById() {
+        Long courseId = 1L;
         Long sectionId = 1L;
         Long contentId = 1L;
 
@@ -95,38 +95,40 @@ class ContentServiceImplTest {
         expectedOutput.setId(contentId);
         expectedOutput.setTitle("Test Content");
 
-        when(contentRepository.findByIdAndSectionId(contentId, sectionId))
+        when(contentRepository.findByIdAndSectionIdAndSection_Course_Id(contentId, sectionId, courseId))
                 .thenReturn(Optional.of(existingContent));
         when(mapper.mapTo(existingContent, ContentOutputDTO.class))
                 .thenReturn(expectedOutput);
 
-        ContentOutputDTO result = contentService.findOneById(sectionId, contentId);
+        ContentOutputDTO result = contentService.findOneById(contentId, sectionId, courseId);
 
         assertNotNull(result, "The result should not be null");
         assertEquals(contentId, result.getId(), "Content ID should match");
         assertEquals("Test Content", result.getTitle(), "Content title should match");
 
-        verify(contentRepository).findByIdAndSectionId(contentId, sectionId);
+        verify(contentRepository).findByIdAndSectionIdAndSection_Course_Id(contentId, sectionId, courseId);
         verify(mapper).mapTo(existingContent, ContentOutputDTO.class);
     }
 
     @Test
     void findOneById_WhenContentNotFound_ShouldThrowException() {
+        Long courseId = 1L;
         Long sectionId = 1L;
         Long contentId = 1L;
 
-        when(contentRepository.findByIdAndSectionId(contentId, sectionId))
+        when(contentRepository.findByIdAndSectionIdAndSection_Course_Id(contentId, sectionId, courseId))
                 .thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> {
-            contentService.findOneById(sectionId, contentId);
+            contentService.findOneById(courseId, sectionId, contentId);
         }, "Should throw exception when content not found");
 
-        verify(contentRepository).findByIdAndSectionId(contentId, sectionId);
+        verify(contentRepository).findByIdAndSectionIdAndSection_Course_Id(contentId, sectionId, courseId);
     }
 
     @Test
     void findById() {
+        Long courseId = 1L;
         Long sectionId = 1L;
         Long contentId = 1L;
 
@@ -136,13 +138,13 @@ class ContentServiceImplTest {
         Content existingContent = new Content();
         existingContent.setId(contentId);
         existingContent.setTitle("Conteúdo Original");
-        when(contentRepository.findByIdAndSectionId(contentId, sectionId)).thenReturn(Optional.of(existingContent));
+        when(contentRepository.findByIdAndSectionIdAndSection_Course_Id(contentId, sectionId, courseId)).thenReturn(Optional.of(existingContent));
 
-        Content resultado = contentService.findById(sectionId,contentId);
+        Content resultado = contentService.findById(courseId, sectionId, contentId);
 
         assertNotNull(resultado);
 
-        verify(contentRepository).findByIdAndSectionId(1L,1L);
+        verify(contentRepository).findByIdAndSectionIdAndSection_Course_Id(1L, 1L,1L);
     }
 
     @Test
@@ -182,6 +184,7 @@ class ContentServiceImplTest {
 
     @Test
     void update() {
+        Long courseId = 1L;
         Long sectionId = 1L;
         Long contentId = 1L;
 
@@ -201,7 +204,7 @@ class ContentServiceImplTest {
         expectedOutput.setTitle("Conteúdo Atualizado");
 
         when(mapper.mapTo(updateContentDTO,Content.class)).thenReturn(updatedContent);
-        when(contentRepository.findByIdAndSectionId(contentId, sectionId))
+        when(contentRepository.findByIdAndSectionIdAndSection_Course_Id(contentId, sectionId, courseId))
                 .thenReturn(Optional.of(existingContent));
         when(utils.getNullPropertyNames(any(Content.class))).thenReturn(new String[]{});
         when(contentRepository.save(existingContent)).thenReturn(updatedContent);
@@ -213,7 +216,7 @@ class ContentServiceImplTest {
         assertEquals(expectedOutput.getId(), result.getId(), "O ID do conteúdo retornado está incorreto");
         assertEquals(expectedOutput.getTitle(), result.getTitle(), "O título do conteúdo retornado está incorreto");
 
-        verify(contentRepository).findByIdAndSectionId(contentId, sectionId);
+        verify(contentRepository).findByIdAndSectionIdAndSection_Course_Id(contentId, sectionId, courseId);
         verify(utils).getNullPropertyNames(any(Content.class));
         verify(contentRepository).save(existingContent);
         verify(mapper).mapTo(updatedContent, ContentOutputDTO.class);

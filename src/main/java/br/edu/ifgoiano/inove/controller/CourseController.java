@@ -1,8 +1,10 @@
 package br.edu.ifgoiano.inove.controller;
 
 import br.edu.ifgoiano.inove.controller.dto.request.course.CourseRequestDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.content.completedContent.CompletedContentResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.course.CourseSimpleResponseDTO;
 import br.edu.ifgoiano.inove.domain.service.CourseService;
+import br.edu.ifgoiano.inove.domain.service.UserCompletedContentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,6 +24,9 @@ public class CourseController {
 
     @Autowired
     private CourseService cursoService;
+
+    @Autowired
+    private UserCompletedContentService completedContentService;
 
     @PostMapping
     @Operation(summary = "Cria um curso")
@@ -87,6 +92,18 @@ public class CourseController {
     })
     public ResponseEntity<List<CourseSimpleResponseDTO>> listInstructorCourses(@PathVariable Long instructorId) {
         return ResponseEntity.status(HttpStatus.OK).body(cursoService.findCoursesByInstructor(instructorId));
+    }
+
+    @GetMapping("{courseId}/discente/{userId}/progresso")
+    @Operation(summary = "Listar cursos de um instrutor")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cursos listados com sucesso.",
+                    content = { @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = CompletedContentResponseDTO.class)))}),
+            @ApiResponse(responseCode = "401", description = "Acesso negado.", content = @Content)
+    })
+    public ResponseEntity<CompletedContentResponseDTO> getStudentProgress(@PathVariable Long courseId, @PathVariable Long userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(completedContentService.getUserProgress(courseId, userId));
     }
 
 }
