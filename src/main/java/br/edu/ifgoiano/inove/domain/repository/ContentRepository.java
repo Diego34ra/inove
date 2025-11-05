@@ -13,6 +13,8 @@ import java.util.Optional;
 @Repository
 public interface ContentRepository extends JpaRepository<Content,Long> {
     List<Content> findBySectionId(Long sectionId);
+    List<Content> findBySectionIdOrderByIdAsc(Long sectionId);
+    Optional<Content> findByIdAndSectionId(Long contentId, Long sectionId);
     Optional<Content> findByIdAndSectionIdAndSection_Course_Id(Long contentId, Long sectionId, Long courseId);
 
     @Modifying

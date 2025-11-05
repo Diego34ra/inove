@@ -8,6 +8,7 @@ import br.edu.ifgoiano.inove.controller.exceptions.ResourceInUseException;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceNotFoundException;
 import br.edu.ifgoiano.inove.domain.model.Content;
 import br.edu.ifgoiano.inove.domain.repository.ContentRepository;
+import br.edu.ifgoiano.inove.domain.repository.UserCompletedContentRepository;
 import br.edu.ifgoiano.inove.domain.service.ContentService;
 import br.edu.ifgoiano.inove.domain.service.CourseService;
 import br.edu.ifgoiano.inove.domain.service.SectionService;
@@ -37,10 +38,13 @@ public class ContentServiceImpl implements ContentService {
     @Autowired
     private InoveUtils inoveUtils;
 
+    @Autowired
+    private UserCompletedContentRepository userCompletedContentRepository;
+
     @Override
     @Transactional(readOnly = true)
     public List<ContentSimpleOutputDTO> list(Long sectionId) {
-        return mapper.toList(contentRepository.findBySectionId(sectionId), ContentSimpleOutputDTO.class);
+        return mapper.toList(contentRepository.findBySectionIdOrderByIdAsc(sectionId), ContentSimpleOutputDTO.class);
     }
 
     @Override
@@ -82,9 +86,15 @@ public class ContentServiceImpl implements ContentService {
     @Transactional
     public void deleteById(Long courseId, Long sectionId, Long contentId) {
         try {
+            Content content = this.findById(courseId, sectionId, contentId);
+
+            userCompletedContentRepository.deleteByContentId(contentId);
+
+            userCompletedContentRepository.flush();
+
             contentRepository.deleteByIdAndSectionId(contentId, sectionId);
         } catch (DataIntegrityViolationException ex) {
-            throw new ResourceInUseException("O conteúdo de ID %d está em uso e não pode ser removido.");
+            throw new ResourceInUseException(String.format("O conteúdo de ID %d está em uso e não pode ser removido.", contentId));
         }
     }
 

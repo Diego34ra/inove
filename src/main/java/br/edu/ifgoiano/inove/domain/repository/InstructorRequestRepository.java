@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface InstructorRequestRepository extends JpaRepository<InstructorRequest, Long> {
     Optional<InstructorRequest> findByToken(String token);
     boolean existsByEmailAndStatus(String email, RequestStatus status);
+    boolean existsByEmail(String email);
+    boolean existsByCpf(String cpf);
 }

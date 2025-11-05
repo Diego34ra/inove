@@ -103,9 +103,7 @@ public class FileServiceImpl implements FileService{
 
         s3Service.deleteFile(bucketName, content.getFileName());
 
-        contentService.deleteById(courseId, courseId, sectionId);
-
-        System.out.println("Todas as referências do arquivo foram deletadas!");
+        contentService.deleteById(courseId, sectionId, contentId);
     }
 
     @Override

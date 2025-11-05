@@ -7,6 +7,7 @@ import br.edu.ifgoiano.inove.domain.model.*;
 import br.edu.ifgoiano.inove.domain.repository.UserCompletedContentRepository;
 import br.edu.ifgoiano.inove.domain.service.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -59,9 +60,22 @@ public class UserCompletedContentServiceImpl implements UserCompletedContentServ
         CompletedContentResponseDTO responseDTO = new CompletedContentResponseDTO();
         responseDTO.setCompletedContents(listContentCompletedDTO(courseId, userId));
 
-       responseDTO.setCompletePercentage(BigDecimal.valueOf(repository.countByCourseIdAndUserId(courseId, userId))
-               .divide(BigDecimal.valueOf(contentService.getContentAmountByCourseId(courseId)), 2 , RoundingMode.HALF_DOWN));
+        Long totalContents = contentService.getContentAmountByCourseId(courseId);
+        Long completedContents = repository.countByCourseIdAndUserId(courseId, userId);
 
-       return responseDTO;
+        if (totalContents > 0) {
+            responseDTO.setCompletePercentage(BigDecimal.valueOf(completedContents)
+                    .divide(BigDecimal.valueOf(totalContents), 2, RoundingMode.HALF_DOWN));
+        } else {
+            responseDTO.setCompletePercentage(BigDecimal.ZERO);
+        }
+
+        return responseDTO;
+    }
+
+    @Override
+    @Transactional
+    public void deleteByContentId(Long contentId) {
+        repository.deleteByContentId(contentId);
     }
 }

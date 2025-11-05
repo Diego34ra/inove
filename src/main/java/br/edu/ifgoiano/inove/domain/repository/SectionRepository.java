@@ -9,6 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface SectionRepository extends JpaRepository<Section,Long> {
-    List<Section> findByCourseId(Long courseId);
+    List<Section> findByCourseIdOrderByIdAsc(Long courseId);
     Optional<Section> findByIdAndCourseId(Long sectionId, Long courseId);
 }

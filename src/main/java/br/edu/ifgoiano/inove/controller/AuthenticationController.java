@@ -60,13 +60,9 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "400", description = "Erro ao autenticar usuário.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
     public ResponseEntity<LoginResponseDTO> login(@RequestBody AuthenticationDTO authenticationDTO){
-        System.out.println("Login autenticado");
         var userNamePassword = new UsernamePasswordAuthenticationToken(authenticationDTO.email(),authenticationDTO.password());
-        System.out.println("Login autenticado 2");
         var auth = authenticationManager.authenticate(userNamePassword);
-        System.out.println("Login autenticado 3");
         var loginResponse = tokenService.getAuthentication((User) auth.getPrincipal());
-        System.out.println("Login autenticado 4");
         return ResponseEntity.ok().body(loginResponse);
     }
 
