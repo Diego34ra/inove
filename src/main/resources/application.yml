@@ -46,6 +46,9 @@ api:
 admin:
   email: inoveprojetointegrador@gmail.com
 
+frontend:
+  url: ${FRONTEND_URL}
+
 resend:
   apiKey: ${RESEND_API_KEY}
   from: ${RESEND_FROM}
