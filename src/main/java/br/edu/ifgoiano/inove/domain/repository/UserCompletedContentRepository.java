@@ -17,4 +17,8 @@ public interface UserCompletedContentRepository extends JpaRepository<UserComple
     @Modifying
     @Query("DELETE FROM UserCompletedContent ucc WHERE ucc.content.id = :contentId")
     void deleteByContentId(@Param("contentId") Long contentId);
+
+    @Modifying
+    @Query("DELETE FROM UserCompletedContent ucc WHERE ucc.course.id = :courseId")
+    void deleteByCourseId(@Param("courseId") Long courseId);
 }

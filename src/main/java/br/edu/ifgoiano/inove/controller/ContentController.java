@@ -8,6 +8,7 @@ import br.edu.ifgoiano.inove.controller.dto.response.content.completedContent.Co
 import br.edu.ifgoiano.inove.domain.model.Content;
 import br.edu.ifgoiano.inove.domain.model.ContentType;
 import br.edu.ifgoiano.inove.domain.model.UserCompletedContent;
+import br.edu.ifgoiano.inove.domain.repository.UserCompletedContentRepository;
 import br.edu.ifgoiano.inove.domain.service.ContentService;
 import br.edu.ifgoiano.inove.domain.service.FileService;
 import br.edu.ifgoiano.inove.domain.service.UserCompletedContentService;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +41,9 @@ public class ContentController {
 
     @Autowired
     private UserCompletedContentService completedContentService;
+    @Autowired
+    private UserCompletedContentRepository userCompletedContentRepository;
+
 
     @PostMapping("/upload")
     public ResponseEntity<?> createContentWithFile(
@@ -117,6 +122,7 @@ public class ContentController {
     }
 
     @PutMapping("/{contentId}/upload")
+    @Transactional
     @Operation(summary = "Atualiza um conteudo com novo arquivo")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Conteudo e arquivo atualizados com sucesso."),
@@ -132,6 +138,10 @@ public class ContentController {
 
         try {
             ContentSimpleRequestDTO contentDTO = new ContentSimpleRequestDTO(title, description, contentType, null, null);
+
+            userCompletedContentRepository.deleteByCourseId(courseId);
+            userCompletedContentRepository.flush();
+
             String uploadMessage = fileService.updateContentFile(file, courseId, sectionId, contentId, contentDTO);
 
             Map<String, String> response = new HashMap<>();
@@ -140,7 +150,11 @@ public class ContentController {
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (IOException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Erro ao processar o arquivo.");
+            errorResponse.put("error", "Erro ao processar o arquivo: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Erro inesperado: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }

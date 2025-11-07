@@ -78,6 +78,8 @@ public class ContentServiceImpl implements ContentService {
         Content newContentModel = mapper.mapTo(newContentDTO,Content.class);
         Content savedContent = this.findById(courseId, sectionId, contentId);
         courseService.saveUpdateDate(courseId);
+
+
         BeanUtils.copyProperties(newContentModel, savedContent, inoveUtils.getNullPropertyNames(newContentModel));
         return mapper.mapTo(contentRepository.save(savedContent), ContentOutputDTO.class);
     }
@@ -88,7 +90,7 @@ public class ContentServiceImpl implements ContentService {
         try {
             Content content = this.findById(courseId, sectionId, contentId);
 
-            userCompletedContentRepository.deleteByContentId(contentId);
+            userCompletedContentRepository.deleteByCourseId(courseId);
 
             userCompletedContentRepository.flush();
 

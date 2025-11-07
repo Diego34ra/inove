@@ -78,4 +78,10 @@ public class UserCompletedContentServiceImpl implements UserCompletedContentServ
     public void deleteByContentId(Long contentId) {
         repository.deleteByContentId(contentId);
     }
+
+    @Override
+    @Transactional
+    public void resetCourseProgress(Long courseId) {
+        repository.deleteByCourseId(courseId);
+    }
 }

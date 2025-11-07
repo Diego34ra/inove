@@ -168,6 +168,10 @@ public class CourseServiceImpl implements CourseService {
         Course course = cursoRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum curso com esse id."));
 
+        entityManager.createNativeQuery("DELETE FROM tb_user_completed_content WHERE course_id = ?1")
+                .setParameter(1, courseId)
+                .executeUpdate();
+
         entityManager.createNativeQuery("DELETE FROM tb_feedback WHERE course_id = ?1")
                 .setParameter(1, courseId)
                 .executeUpdate();
@@ -186,10 +190,6 @@ public class CourseServiceImpl implements CourseService {
                 .executeUpdate();
 
         entityManager.createNativeQuery("DELETE FROM tb_admin_course WHERE course_id = ?1")
-                .setParameter(1, courseId)
-                .executeUpdate();
-
-        entityManager.createNativeQuery("DELETE FROM tb_user_completed_content WHERE course_id = ?1")
                 .setParameter(1, courseId)
                 .executeUpdate();
 

@@ -10,4 +10,5 @@ public interface UserCompletedContentService {
     List<CompletedContentMinDTO> listContentCompletedDTO(Long courseId, Long userId);
     CompletedContentResponseDTO getUserProgress(Long courseId, Long userId);
     void deleteByContentId(Long contentId);
+    void resetCourseProgress(Long courseId);
 }
