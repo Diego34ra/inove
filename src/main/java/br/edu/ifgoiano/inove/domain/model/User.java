@@ -59,9 +59,10 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "course_id"))
     private Set<Course> instructor_courses;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("student")
     private List<FeedBack> feedbacks;
+
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
