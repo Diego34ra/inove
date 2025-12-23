@@ -82,7 +82,7 @@ public class S3ServiceImpl implements FileService {
 
     @Override
     public String updateContentFile(MultipartFile file, Long courseId, Long sectionId, Long contentId, ContentSimpleRequestDTO contentDTO) throws IOException {
-        Content existingContent = contentService.findById(sectionId, contentId);
+        Content existingContent = contentService.findById(courseId, sectionId, contentId);
 
         if (existingContent.getFileName() != null && !existingContent.getFileName().isEmpty()) {
             try {
@@ -125,7 +125,7 @@ public class S3ServiceImpl implements FileService {
     @Override
     @Transactional
     public void delete(Long courseId, Long sectionId, Long contentId) {
-        Content content = contentService.findById(sectionId, contentId);
+        Content content = contentService.findById(courseId, sectionId, contentId);
 
         if (content.getFileName() != null && !content.getFileName().isEmpty()) {
             try {
@@ -140,7 +140,7 @@ public class S3ServiceImpl implements FileService {
             }
         }
 
-        contentService.deleteById(sectionId, contentId);
+        contentService.deleteById(courseId, sectionId, contentId);
         courseService.saveUpdateDate(courseId);
     }
 

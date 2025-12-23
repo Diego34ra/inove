@@ -13,7 +13,6 @@ import br.edu.ifgoiano.inove.controller.exceptions.ErrorDetails;
 import br.edu.ifgoiano.inove.controller.exceptions.ResourceBadRequestException;
 import br.edu.ifgoiano.inove.domain.model.User;
 import br.edu.ifgoiano.inove.domain.service.PasswordRecoveryService;
-import br.edu.ifgoiano.inove.domain.service.SchoolService;
 import br.edu.ifgoiano.inove.domain.service.UserService;
 import br.edu.ifgoiano.inove.security.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +29,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 
 @RestController
 @RequestMapping("api/inove/auth")
@@ -59,14 +59,14 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "200", description = "Usuário autenticado com sucesso.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Erro ao autenticar usuário.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody AuthenticationDTO authenticationDTO){
-        System.out.println("Login autenticado");
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody AuthenticationDTO authenticationDTO, HttpServletResponse response){
         var userNamePassword = new UsernamePasswordAuthenticationToken(authenticationDTO.email(),authenticationDTO.password());
-        System.out.println("Login autenticado 2");
         var auth = authenticationManager.authenticate(userNamePassword);
-        System.out.println("Login autenticado 3");
         var loginResponse = tokenService.getAuthentication((User) auth.getPrincipal());
-        System.out.println("Login autenticado 4");
+
+        // Adicionar cookies de autenticação
+        addAuthenticationCookies(response, loginResponse);
+
         return ResponseEntity.ok().body(loginResponse);
     }
 
@@ -76,9 +76,24 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "200", description = "Autenticação atualizada com sucesso.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = RefreshTokenDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Erro ao atualizar autenticação.",content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDetails.class))})
     })
-    public ResponseEntity<LoginResponseDTO> refreshToken(@RequestBody RefreshTokenDTO refreshTokenDTO){
+    public ResponseEntity<LoginResponseDTO> refreshToken(@RequestBody RefreshTokenDTO refreshTokenDTO, HttpServletResponse response){
         var loginResponse = tokenService.getRefreshToken(refreshTokenDTO);
+
+        // Atualizar cookies com novos tokens
+        addAuthenticationCookies(response, loginResponse);
+
         return ResponseEntity.ok().body(loginResponse);
+    }
+
+    @PostMapping("logout")
+    @Operation(summary = "Fazer logout")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Logout realizado com sucesso.")
+    })
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        // Limpar cookies de autenticação
+        clearAuthenticationCookies(response);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("register")
@@ -133,5 +148,66 @@ public class AuthenticationController {
                 .body(mapper.mapTo(
                         userService.updatePasswordByEmail(dto.getEmail(),
                         dto.getPassword()), UserResponseDTO.class));
+    }
+
+    /**
+     * Adiciona cookies de autenticação na resposta
+     * authToken: HttpOnly (máxima segurança, não acessível via JS)
+     * authTokenReadable: Sem HttpOnly (para sincronização no frontend)
+     * refreshToken: HttpOnly (máxima segurança)
+     */
+    private void addAuthenticationCookies(HttpServletResponse response, LoginResponseDTO loginResponse) {
+        // Cookie para authToken (HttpOnly - máxima segurança)
+        Cookie authTokenCookie = new Cookie("authToken", loginResponse.token());
+        authTokenCookie.setHttpOnly(true);
+        authTokenCookie.setSecure(true);        // Apenas HTTPS
+        authTokenCookie.setPath("/");
+        authTokenCookie.setMaxAge(3600);        // 1 hora
+        authTokenCookie.setAttribute("SameSite", "Strict");
+        response.addCookie(authTokenCookie);
+
+        // Cookie para authTokenReadable (sem HttpOnly - para leitura no frontend)
+        Cookie authTokenReadableCookie = new Cookie("authTokenReadable", loginResponse.token());
+        authTokenReadableCookie.setHttpOnly(false);
+        authTokenReadableCookie.setSecure(true);
+        authTokenReadableCookie.setPath("/");
+        authTokenReadableCookie.setMaxAge(3600);
+        authTokenReadableCookie.setAttribute("SameSite", "Strict");
+        response.addCookie(authTokenReadableCookie);
+
+        // Cookie para refreshToken (HttpOnly - máxima segurança)
+        Cookie refreshTokenCookie = new Cookie("refreshToken", loginResponse.refreshToken());
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(604800);   // 7 dias
+        refreshTokenCookie.setAttribute("SameSite", "Strict");
+        response.addCookie(refreshTokenCookie);
+    }
+
+    /**
+     * Limpa cookies de autenticação
+     */
+    private void clearAuthenticationCookies(HttpServletResponse response) {
+        // Limpar authToken
+        Cookie authTokenCookie = new Cookie("authToken", null);
+        authTokenCookie.setHttpOnly(true);
+        authTokenCookie.setPath("/");
+        authTokenCookie.setMaxAge(0);
+        response.addCookie(authTokenCookie);
+
+        // Limpar authTokenReadable
+        Cookie authTokenReadableCookie = new Cookie("authTokenReadable", null);
+        authTokenReadableCookie.setHttpOnly(false);
+        authTokenReadableCookie.setPath("/");
+        authTokenReadableCookie.setMaxAge(0);
+        response.addCookie(authTokenReadableCookie);
+
+        // Limpar refreshToken
+        Cookie refreshTokenCookie = new Cookie("refreshToken", null);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(0);
+        response.addCookie(refreshTokenCookie);
     }
 }

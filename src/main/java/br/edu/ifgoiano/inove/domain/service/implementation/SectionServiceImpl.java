@@ -38,7 +38,7 @@ public class SectionServiceImpl implements SectionService {
     @Override
     @Transactional(readOnly = true)
     public List<SectionSimpleResponseDTO> list(Long courseId) {
-        return mapper.toList(sectionRespository.findByCourseId(courseId), SectionSimpleResponseDTO.class);
+        return mapper.toList(sectionRespository.findByCourseIdOrderByIdAsc(courseId), SectionSimpleResponseDTO.class);
     }
 
     @Override

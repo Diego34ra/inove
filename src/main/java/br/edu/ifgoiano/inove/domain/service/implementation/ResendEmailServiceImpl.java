@@ -43,11 +43,18 @@ public class ResendEmailServiceImpl implements EmailService {
 
     @Override
     public void sendHtml(String toEmail, String subject, String htmlBody) {
+        String textBody = htmlBody
+                .replaceAll("<style[^>]*>.*?</style>", "")
+                .replaceAll("<[^>]+>", "")
+                .replaceAll("\\s+", " ")
+                .trim();
+
         CreateEmailOptions.Builder builder = CreateEmailOptions.builder()
                 .from(fromEmail)
                 .to(toEmail)
                 .subject(subject)
-                .html(htmlBody);
+                .html(htmlBody)
+                .text(textBody);
 
         if (!replyTo.isEmpty()) builder.replyTo(replyTo);
 

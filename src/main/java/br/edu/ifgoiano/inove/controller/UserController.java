@@ -3,6 +3,7 @@ package br.edu.ifgoiano.inove.controller;
 import br.edu.ifgoiano.inove.controller.dto.request.user.*;
 import br.edu.ifgoiano.inove.controller.dto.mapper.MyModelMapper;
 import br.edu.ifgoiano.inove.controller.dto.response.course.CourseSimpleResponseDTO;
+import br.edu.ifgoiano.inove.controller.dto.response.school.SchoolResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.StudentResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserResponseDTO;
 import br.edu.ifgoiano.inove.controller.dto.response.user.UserSimpleResponseDTO;
@@ -186,8 +187,14 @@ public class UserController {
     }
 
     @GetMapping("/instrutor/confirmar")
-    public ResponseEntity<String> confirmInstructor(@RequestParam String email) {
-        userService.confirmInstructorRegistration(email);
-        return ResponseEntity.status(HttpStatus.OK).body("Cadastro confirmado com sucesso.");
+    public ResponseEntity<String> confirmInstructor(@RequestParam String token) {
+        userService.confirmInstructorRegistrationByToken(token);
+        return ResponseEntity.ok("Cadastro confirmado com sucesso.");
+    }
+
+    @GetMapping("/{id}/school")
+    public ResponseEntity<SchoolResponseDTO> getUserSchool(@PathVariable Long id) {
+        SchoolResponseDTO school = userService.findSchoolByUserId(id);
+        return ResponseEntity.ok(school);
     }
 }
